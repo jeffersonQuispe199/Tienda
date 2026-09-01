@@ -1,0 +1,541 @@
+
+/* ==========================================================================
+   FONDO DE PÁGINA CON IMAGEN Y EFECTO BORROSO (BLUR)
+   ========================================================================== */
+body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background-image: url('fonto.jpg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    /* Controla qué tan borroso se ve (puedes subir a 8px o bajar a 3px) */
+    filter: blur(5px); 
+    /* Oscurece un poco la imagen para que resalten más tus cards */
+    opacity: 0.4; 
+    z-index: -1; /* Envía la imagen al fondo de todo */
+    pointer-events: none; /* Evita que interfiera con los clics en la app */
+}
+
+body {
+    background: #0d1117; /* Mantiene un fondo base oscuro por si la imagen tarda en cargar */
+    color: #c9d1d9;
+    padding: 20px;
+    min-height: 100vh;
+}
+/* ==========================================================================
+   ESTILOS GENERALES - ESTILO TECNOLÓGICO / FUTURISTA
+   ========================================================================== */
+
+   * {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+}
+
+body {
+    background: #0d1117; /* Fondo oscuro tipo GitHub/VSC */
+    color: #c9d1d9; /* Texto claro de baja fatiga visual */
+    padding: 20px;
+}
+
+.contenedor {
+    max-width: 1200px;
+    margin: auto;
+}
+
+/* Tarjetas con efecto de cristal esmerilado y borde de neón sutil */
+.card {
+    background: #161b22;
+    padding: 25px;
+    border-radius: 12px;
+    margin-bottom: 25px;
+    border: 1px solid #30363d;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+h1 {
+    color: #58a6ff; /* Azul tecnológico brillante */
+    font-weight: 700;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    font-size: 2.2rem;
+}
+
+h2 {
+    margin-bottom: 20px;
+    color: #58a6ff;
+    font-weight: 600;
+    border-bottom: 1px solid #30363d;
+    padding-bottom: 10px;
+}
+
+.titulo {
+    text-align: center;
+    padding: 25px;
+    background: #161b22;
+    border-radius: 12px;
+    border: 1px solid #30363d;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+}
+
+/* ==========================================================================
+   ANIMACIÓN LED 3D PARA EL TÍTULO
+   ========================================================================== */
+.led-3d-animacion {
+    font-size: 2.5rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #58a6ff;
+    display: inline-block;
+    animation: brilloLed3D 3s infinite ease-in-out;
+}
+
+@keyframes brilloLed3D {
+    0%, 100% {
+        transform: perspective(500px) rotateX(10deg) rotateY(-5deg);
+        text-shadow: 
+            1px 1px 0px #0969da,
+            2px 2px 0px #0969da,
+            3px 3px 0px #0969da,
+            4px 4px 5px rgba(0, 0, 0, 0.7),
+            0 0 10px rgba(88, 166, 255, 0.5),
+            0 0 20px rgba(88, 166, 255, 0.3);
+    }
+    50% {
+        transform: perspective(500px) rotateX(10deg) rotateY(5deg);
+        text-shadow: 
+            1px 1px 0px #58a6ff,
+            2px 2px 0px #58a6ff,
+            3px 3px 0px #58a6ff,
+            4px 4px 5px rgba(0, 0, 0, 0.7),
+            0 0 20px rgba(88, 166, 255, 0.8),
+            0 0 40px rgba(88, 166, 255, 0.5);
+    }
+}
+
+/* Ajuste del efecto LED 3D cuando pasa a Modo Claro */
+body.light-theme .led-3d-animacion {
+    color: #0969da;
+    animation: brilloLed3DClaro 3s infinite ease-in-out;
+}
+
+@keyframes brilloLed3DClaro {
+    0%, 100% {
+        transform: perspective(500px) rotateX(10deg) rotateY(-5deg);
+        text-shadow: 
+            1px 1px 0px #b6d4fe,
+            2px 2px 0px #b6d4fe,
+            3px 3px 4px rgba(0, 0, 0, 0.2),
+            0 0 8px rgba(9, 105, 218, 0.3);
+    }
+    50% {
+        transform: perspective(500px) rotateX(10deg) rotateY(5deg);
+        text-shadow: 
+            1px 1px 0px #0969da,
+            2px 2px 0px #0969da,
+            3px 3px 4px rgba(0, 0, 0, 0.2),
+            0 0 15px rgba(9, 105, 218, 0.5);
+    }
+}
+
+.titulo p {
+    color: #8b949e;
+    font-size: 1.1rem;
+    margin-top: 5px;
+}
+
+.titulo h4 {
+    margin-top: 15px;
+    color: #58a6ff;
+    text-transform: uppercase;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+}
+
+/* Tablas con diseño de matriz de datos */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 20px 0;
+    background: #0d1117;
+    border-radius: 8px;
+    overflow: hidden;
+    border: 1px solid #30363d;
+}
+
+th {
+    background: #21262d;
+    color: #58a6ff;
+    padding: 12px;
+    font-weight: 600;
+    text-align: center;
+    border-bottom: 2px solid #30363d;
+}
+
+td {
+    padding: 12px;
+    border-bottom: 1px solid #21262d;
+    color: #c9d1d9;
+    text-align: center;
+}
+
+/* Controles, Inputs y Selects Futuristas */
+input, select {
+    width: 100%;
+    padding: 12px;
+    background: #0d1117;
+    border: 1px solid #30363d;
+    border-radius: 6px;
+    color: #f0f6fc;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+input:focus, select:focus {
+    outline: none;
+    border-color: #58a6ff;
+    box-shadow: 0 0 8px rgba(88, 166, 255, 0.4);
+    background: #161b22;
+}
+
+/* Botones con transiciones de interfaz de comandos */
+button {
+    background: #21262d;
+    color: #c9d1d9;
+    border: 1px solid #f0f6fc;
+    padding: 12px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    transition: all 0.3s ease;
+}
+
+button:hover {
+    background: #58a6ff;
+    color: #0d1117;
+    border-color: #58a6ff;
+    box-shadow: 0 0 12px rgba(88, 166, 255, 0.4);
+}
+
+/* Estilo específico para botones de acción peligrosa o eliminación (X) */
+td button {
+    background: #21262d;
+    color: #f85149;
+    border: 1px solid #f85149;
+    padding: 5px 10px;
+}
+
+td button:hover {
+    background: #f85149;
+    color: #ffffff;
+    border-color: #f85149;
+    box-shadow: 0 0 10px rgba(248, 81, 73, 0.4);
+}
+
+/* Menú de navegación estilo Dashboard */
+.menu {
+    background: #161b22;
+    padding: 12px;
+    display: flex;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 25px;
+    border-radius: 12px;
+    border: 1px solid #30363d;
+}
+
+.menu button {
+    background: transparent;
+    color: #8b949e;
+    border: 1px solid transparent;
+}
+
+.menu button:hover {
+    color: #58a6ff;
+    background: #21262d;
+    border-color: #30363d;
+    box-shadow: none;
+}
+
+/* Grid de distribución en Facturación */
+.grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 15px;
+    align-items: end;
+}
+
+@media(max-width:900px){
+    .grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+.oculto {
+    display: none;
+}
+
+/* ==========================================================================
+   ESTILOS PARA EL PIE DE PÁGINA (FOOTER)
+   ========================================================================== */
+.pie-pagina {
+    margin-top: 50px;
+    padding: 20px;
+    background: #161b22;
+    border-top: 1px solid #30363d;
+    text-align: center;
+    border-radius: 8px;
+}
+
+.pie-pagina p {
+    color: #8b949e;
+    font-size: 0.9rem;
+    letter-spacing: 0.5px;
+    margin: 4px 0;
+}
+
+.pie-pagina span {
+    color: #58a6ff;
+    font-weight: 600;
+}
+
+@media print {
+    .pie-pagina {
+        display: none !important;
+    }
+}
+
+/* ==========================================================================
+   CORRECCIÓN CRÍTICA DE CONTRASTE PARA EL MINI QUIZ
+   ========================================================================== */
+#contenedorQuiz p {
+    color: #58a6ff !important;
+    font-size: 1.1rem;
+    font-weight: bold;
+    margin-bottom: 12px;
+}
+
+#contenedorQuiz label {
+    display: block !important;
+    background-color: #ffffff !important;
+    color: #000000 !important;
+    border: 1px solid #30363d !important;
+    padding: 12px 15px !important;
+    margin: 8px 0 !important;
+    border-radius: 6px !important;
+    font-weight: 600 !important;
+    cursor: pointer;
+    transition: background 0.2s ease;
+}
+
+#contenedorQuiz label:hover {
+    background-color: #f0f4f8 !important;
+    border-color: #58a6ff !important;
+}
+
+#contenedorQuiz input[type="radio"] {
+    margin-right: 12px !important;
+    transform: scale(1.1);
+    accent-color: #1f3c88;
+}
+
+/* ==========================================================================
+   OPTIMIZACIÓN DE TAMAÑO PARA INPUTS EN LA PORTADA
+   ========================================================================== */
+#portada input[type="text"],
+#portada input[type="number"] {
+    width: auto;
+    max-width: 250px;
+    padding: 6px 12px;
+    font-size: 0.9rem;
+    display: inline-block;
+    margin: 6px 0;
+}
+
+#portada label {
+    display: block;
+    margin-top: 10px;
+    font-size: 0.9rem;
+    color: #8b949e;
+    font-weight: 600;
+}
+
+#portada button {
+    padding: 6px 15px;
+    font-size: 0.9rem;
+    vertical-align: middle;
+}
+
+/* ==========================================================================
+   ESTILIZACIÓN PARA LOGO EN IMAGEN CON BORDES SÚPER REDONDEADOS
+   ========================================================================== */
+.logo-contenedor {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.logo-img {
+    max-height: 90px;
+    width: auto;
+    object-fit: cover;
+    border-radius: 50px;
+    border: 2px solid #58a6ff;
+    padding: 4px;
+    background: #161b22;
+    box-shadow: 0 0 15px rgba(88, 166, 255, 0.4);
+    transition: all 0.3s ease;
+}
+
+.logo-img:hover {
+    transform: scale(1.06) rotate(2deg);
+    box-shadow: 0 0 25px rgba(88, 166, 255, 0.8);
+    border-color: #79c0ff;
+}
+
+/* ==========================================================================
+   BOTÓN COMPLETAMENTE FIJO DE TEMA (SUPERIOR DERECHA)
+   ========================================================================== */
+.btn-tema-flotante {
+    position: fixed; /* Mantiene el botón inmóvil en pantalla al hacer scroll */
+    top: 20px;
+    right: 20px;
+    z-index: 99999; /* Prioridad máxima por encima de cualquier modal o menú */
+    background: #161b22;
+    color: #58a6ff;
+    border: 1px solid #30363d;
+    padding: 10px 18px;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: bold;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.6);
+    transition: all 0.2s ease-in-out;
+}
+
+.btn-tema-flotante:hover {
+    background: #58a6ff;
+    color: #0d1117;
+    border-color: #58a6ff;
+    box-shadow: 0 0 18px rgba(88, 166, 255, 0.7);
+    transform: scale(1.05);
+}
+
+@media print {
+    .btn-tema-flotante {
+        display: none !important;
+    }
+}
+
+/* ==========================================================================
+   ESTILOS ADAPTATIVOS PARA EL MODO CLARO (.light-theme)
+   ========================================================================== */
+body.light-theme {
+    background: #f4f6f9;
+    color: #24292f;
+}
+
+body.light-theme .btn-tema-flotante {
+    background: #ffffff;
+    color: #0969da;
+    border-color: #d0d7de;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+body.light-theme .btn-tema-flotante:hover {
+    background: #0969da;
+    color: #ffffff;
+}
+
+body.light-theme .card, 
+body.light-theme .menu,
+body.light-theme .titulo {
+    background: #ffffff;
+    border-color: #d0d7de;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+}
+
+body.light-theme h2, 
+body.light-theme .titulo h4,
+body.light-theme .pie-pagina span {
+    color: #0969da;
+}
+
+body.light-theme h2 {
+    border-bottom: 1px solid #d0d7de;
+}
+
+body.light-theme table,
+body.light-theme input, 
+body.light-theme select {
+    background: #ffffff;
+    border-color: #d0d7de;
+    color: #24292f;
+}
+
+body.light-theme th {
+    background: #f6f8fa;
+    color: #0969da;
+    border-bottom: 2px solid #d0d7de;
+}
+
+body.light-theme td {
+    border-bottom: 1px solid #f6f8fa;
+    color: #24292f;
+}
+
+body.light-theme input:focus, 
+body.light-theme select:focus {
+    border-color: #0969da;
+    box-shadow: 0 0 8px rgba(9, 105, 218, 0.3);
+    background: #ffffff;
+}
+
+body.light-theme button {
+    background: #f6f8fa;
+    color: #24292f;
+    border-color: #d0d7de;
+}
+
+body.light-theme button:hover {
+    background: #0969da;
+    color: #ffffff;
+    border-color: #0969da;
+    box-shadow: 0 0 12px rgba(9, 105, 218, 0.3);
+}
+
+body.light-theme .menu button {
+    background: transparent;
+    color: #57606a;
+}
+
+body.light-theme .menu button:hover {
+    color: #0969da;
+    background: #f6f8fa;
+    border-color: #d0d7de;
+}
+
+body.light-theme .pie-pagina {
+    background: #ffffff;
+    border-top: 1px solid #d0d7de;
+}
+/* Correcciones de visualización en impresión para el módulo contable */
+@media print {
+    #contabilidad button, 
+    #contabilidad h4 {
+        display: none !important;
+    }
+}
+
+/* Adaptación del layout contable al Modo Claro */
+body.light-theme #totalGananciasAcumuladas {
+    color: #0969da !important;
+}

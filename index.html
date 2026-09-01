@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini Facturador</title>
+    <link rel="stylesheet" href="apariencia.css">
+</head>
+
+<body>
+
+    <button id="btn-tema" class="btn-tema-flotante" onclick="alternarTema()">🌙 Modo Oscuro</button>
+  <div class="titulo">
+            <h1 class="led-3d-animacion">Tienda</h1>            
+        </div>
+        <br><br>
+    <div class="menu">
+        <div class="logo-contenedor">
+            <img src="logo.png" alt="Logo CoreFact" class="logo-img">
+        </div>
+        <button onclick="mostrarSeccion('facturacion')">Facturación</button>
+        <button onclick="mostrarSeccion('clientes')">Clientes</button>
+        <button onclick="mostrarSeccion('productos')">Productos</button>
+        <button onclick="mostrarSeccion('contabilidad')">Contabilidad</button>
+        <button onclick="mostrarSeccion('teoria')">Material de Estudio</button>
+        <button onclick="mostrarSeccion('quiz')">Mini Quiz</button>
+    </div>
+
+    <div class="contenedor">
+
+ 
+
+        <!-- SECCIÓN: QUIZ -->
+        <div id="quiz" class="seccion oculto">
+            <h2>Mini Quiz - Sistema de Facturación</h2>
+            <div id="contenedorQuiz"></div>
+            <p style="margin-top: 20px; display: flex; gap: 15px;">
+                <button onclick="corregir()" id="btnEnviar" style="background:#1f3c88; color:white; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; flex: 1;">
+                    Enviar y Calcular Nota (Sobre 100)
+                </button>
+                <button onclick="reiniciarQuiz()" id="btnReiniciar" style="background:#50eb25; color:white; padding: 12px 25px; border-radius: 5px; cursor: pointer; font-weight: bold; flex: 1; display: none;">
+                    Nuevo Intento 🔄
+                </button>
+            </p>
+            <div id="resultado"></div>
+        </div>
+
+        <!-- SECCIÓN: MATERIAL DE ESTUDIO -->
+        <div id="teoria" class="seccion oculto">
+            <div class="card">
+                <h1>¿Qué es la Facturación?</h1>
+                <p>La facturación es el proceso mediante el cual una empresa registra la venta de productos o servicios a un cliente. Su objetivo es controlar ingresos, calcular impuestos y generar comprobantes legales.</p>
+            </div>
+            <div class="card">
+                <h1>Elementos de una Factura</h1>
+                <ul>
+                    <li>Datos del cliente</li>
+                    <li>Descripción de productos</li>
+                    <li>Cantidad</li>
+                    <li>Precio unitario</li>
+                    <li>Subtotal</li>
+                    <li>IVA</li>
+                    <li>Total a pagar</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h1>Fórmula del Subtotal</h1>
+                <p><strong>Subtotal = Cantidad × Precio</strong></p>
+                <p>Ejemplo: 3 cuadernos × $2.00 = $6.00</p>
+            </div>
+            <div class="card">
+                <h1>Fórmula del IVA</h1>
+                <p><strong>IVA = Subtotal × Porcentaje IVA</strong></p>
+                <p>Ejemplo: $100 × 15% = $15</p>
+            </div>
+            <div class="card">
+                <h1>Fórmula del Total</h1>
+                <p><strong>Total = Subtotal + IVA</strong></p>
+                <p>Ejemplo: Subtotal = $100<br>IVA = $15<br>Total = $115</p>
+            </div>
+            <div class="card">
+                <h1>Ejercicio Resuelto</h1>
+                <p>Una tienda vende:</p>
+                <ul>
+                    <li>2 teclados a $20</li>
+                    <li>1 mouse a $10</li>
+                </ul>
+                <p>Subtotal = (2 × 20) + 10 = $50</p>
+                <p>IVA 15% = $7.50</p>
+                <p>Total = $57.50</p>
+            </div>
+            <div class="card">
+                <h1>IVA</h1>
+                <p>El iva en Ecuador es del 15% que pagas al comprar la mayoria de productos y servicios. 15% productos procesados, ropa, tecnologia, repuestos y la mayoria de servicios. 0% Alimentos frescos educación y transporte. 5% Material de construcción.</p>
+            </div>
+            <div class="card">
+                <h1>Productos Gravados con Iva</h1>
+                <p>En Ecuador, la tarifa general del IVA es del 15% se aplica en la mayoria de bienes y servicios sin embargo productos de primera necesidad, medicamentos y otros servicios esenciales cuentan con una tarifa del 0% para proteger el consumo básico.</p>
+            </div>
+            <div class="card">
+                <h1>Productos Tarifa 0</h1>
+                <p>Los productos con tarifa cero son aquellos que no tiene iva, normalmente bienes y servicios esenciales para proteger la economia familiar en alimentacion, salud y transporte.</p>
+            </div>
+            <div class="card">
+                <h1>SUBTOTAL</h1>
+                <p>Es la suma de los productos sin aplicar el iva o restar cualquier descuento</p>
+            </div>
+            <div class="card">
+                <h1>Conclusión</h1>
+                <p>La facturación permite registrar ventas de manera organizada, calcular impuestos y obtener el valor final que debe pagar el cliente. Es una herramienta fundamental para cualquier negocio.</p>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: CLIENTES -->
+        <div id="clientes" class="seccion oculto">
+            <div class="card">
+                <h2>Clientes</h2>
+                <input type="text" id="nombreCliente" placeholder="Nombre">
+                <br><br/>
+                <input type="text" id="cedulaCliente" placeholder="Cédula">
+                 <br><br/>
+                <input type="text" id="telefonoCliente" placeholder="Teléfono">
+                 <br><br/>
+                <input type="email" id="correoCliente" placeholder="Correo">
+                 <br><br/>
+                <button onclick="guardarCliente()">Guardar Cliente</button>
+                <button onclick="modificarCliente()"> Modificar Cliente</button>
+                <button onclick="buscarCliente()">Buscar Cliente</button>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nombre</th>
+                            <th>Cédula</th>
+                            <th>Telefono</th>
+                            <th>Correo</th>
+                            <th>Eliminar</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaClientes"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: FACTURACIÓN -->
+        <div id="facturacion" class="seccion oculto">
+           
+
+            <div class="card">
+                <h2>COMPRA DE PRODUCTOS</h2>
+                <div class="grid">
+                    <div>
+                        <label>Producto</label>
+                        <input type="text" id="producto" placeholder="Escribe el producto...">
+                    </div>
+                    <div>
+                        <label>Cantidad</label>
+                        <input type="number" id="cantidad" value="1">
+                    </div>
+                    <div>
+                        <label>Precio</label>
+                        <input type="number" id="precio">
+                    </div>
+                    <div class="boton">
+                        <button onclick="agregarProducto()" style="background: #58a6ff; color: #0d1117;">Agregar a la Factura</button>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Cantidad</th>
+                            <th>Precio</th>
+                            <th>Total</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaProductos"></tbody>
+                </table>
+            </div>
+             <div class="card">
+                <h2>Datos del Cliente (Opcional)</h2>
+                <div class="grid">
+                    <div>
+                        <label>Cédula / RUC</label>
+                        
+                        <div style="display: flex; gap: 5px;">
+                            <input type="text" id="cedula" placeholder="Buscar o dejar en blanco...">
+                            <button onclick="buscarClienteFactura()" style="padding: 10px; background: #58a6ff; color: #0d1117;">🔍</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label>Nombre</label>
+                        <input type="text" id="cliente" placeholder="Consumidor Final (Opcional)">
+                    </div>
+                    <div>
+                        <label>Teléfono</label>
+                        <input type="text" id="telefono">
+                    </div>
+                    <div>
+                        <label>Correo</label>
+                        <input type="email" id="correo">
+                    </div>
+                </div>
+            </div>
+
+            <div class="totales">
+                <div class="box-total">
+                    <h3>Totales y Pago</h3>
+                    <div class="linea">
+                        <span>Subtotal:</span>
+                        <span id="subtotal">$0.00</span>
+                    </div>
+                    <div class="linea">
+                        <span>IVA %</span>
+                        <input type="number" id="iva" value="15" onkeyup="calcularTotales()" onchange="calcularTotales()">
+                    </div>
+                    <div class="linea">
+                        <span>IVA:</span>
+                        <span id="valorIva">$0.00</span>
+                    </div>
+                    <div class="linea" style="border-bottom: 2px solid #30363d; padding-bottom: 8px; margin-bottom: 8px;">
+                        <strong>Total a Pagar:</strong>
+                        <strong id="total">$0.00</strong>
+                    </div>
+
+                    <!-- CAMPOS PARA COBRO Y CAMBIO/VUELTO -->
+                    <div class="linea" style="margin-top: 10px;">
+                        <span>Paga con ($):</span>
+                        <input type="number" id="montoRecibido" step="0.01" placeholder="0.00" oninput="calcularVuelto()" style="width: 120px; font-weight: bold; text-align: right;">
+                    </div>
+                    <div class="linea" style="margin-top: 5px;">
+                        <strong style="color: #2ea44f;">Vuelto / Cambio:</strong>
+                        <strong id="vueltoCliente" style="color: #2ea44f; font-size: 1.2rem;">$0.00</strong>
+                    </div>
+                </div>
+                <br>
+                <div style="display: flex; gap: 10px; justify-content: flex-end;">
+                    <button onclick="imprimirFacturaClientePDF()" style="background: #1f3c88; color: #ffffff; border-color: #1f3c88;">🖨️ Imprimir PDF</button>
+                    <button onclick="guardarYLimpiarFactura()" style="background: #2ea44f; color: #ffffff; border-color: #2ea44f;">💾 Guardar Factura</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL DE AUTENTICACIÓN PARA CONTABILIDAD -->
+        <div id="modalLoginContabilidad" class="oculto" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000;">
+            <div class="card" style="width: 350px; text-align: center; border: 1px solid #30363d; background: #161b22; padding: 25px; border-radius: 8px;">
+                <h2 style="color: #58a6ff; margin-bottom: 15px;">🔒 Acceso Restringido</h2>
+                <p style="color: #8b949e; font-size: 0.9rem; margin-bottom: 20px;">Ingresa tus credenciales para ver la contabilidad.</p>
+                
+                <div style="text-align: left; margin-bottom: 15px;">
+                    <label>Usuario</label>
+                    <input type="text" id="usuarioContabilidad" placeholder="Usuario admin" style="width: 100%; margin-top: 5px;">
+                </div>
+                
+                <div style="text-align: left; margin-bottom: 20px;">
+                    <label>Contraseña</label>
+                    <input type="password" id="claveContabilidad" placeholder="••••••••" style="width: 100%; margin-top: 5px;" onkeypress="evaluarTeclaLogin(event)">
+                </div>
+
+                <div style="display: flex; gap: 10px;">
+                    <button onclick="cerrarModalLogin()" style="background: #21262d; color: #c9d1d9; flex: 1;">Cancelar</button>
+                    <button onclick="validarAccesoContabilidad()" style="background: #238636; color: white; flex: 1;">Ingresar</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: CONTABILIDAD (PROTEGIDA) -->
+        <div id="contabilidad" class="seccion oculto">
+            <div class="card">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                    <h2 style="margin: 0;">Contabilidad e Historial de Ganancias</h2>
+                    <button onclick="cerrarSesionContabilidad()" style="background: #cf222e; color: white; padding: 6px 12px; font-size: 0.85rem;">🔒 Cerrar Sesión</button>
+                </div>
+                
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 15px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px;">
+                    <div>
+                        <h4 style="margin: 0; color: #8b949e; letter-spacing: 1px;">GANANCIAS ACUMULADAS TOTALES</h4>
+                        <h1 id="totalGananciasAcumuladas" style="font-size: 2.5rem; color: #58a6ff; margin-top: 5px;">$ 0.00</h1>
+                    </div>
+                    <div>
+                        <button onclick="exportarContabilidadExcel()" style="background: #238636; color: white; border-color: #238636; padding: 12px 25px;">📊 Imprimir en Excel</button>
+                        <button onclick="vaciarHistorialContable()" style="background: #21262d; color: #f85149; border-color: #f85149; margin-left: 10px; padding: 12px 15px;">Borrar Historial</button>
+                    </div>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cliente</th>
+                            <th>Cédula / RUC</th>
+                            <th>Productos Agregados</th>
+                            <th>Total Facturado</th>
+                            <th>Paga con</th>
+                            <th>Vuelto</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaHistorialContable"></tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: INVENTARIO DE PRODUCTOS -->
+        <div id="productos" class="seccion oculto">
+            <div class="card">
+                <h2>Inventario de Productos del Sistema</h2>
+
+                <button onclick="mostrarTodos()">Todos</button>
+                <button onclick="mostrarConIva()">Con IVA</button>
+                <button onclick="mostrarSinIva()">Sin IVA</button>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Producto</th>
+                            <th>Precio</th>
+                            <th>IVA %</th>
+                            <th>IVA $</th>
+                            <th>Total</th>
+                            <th>Acción</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tablaProductosLista"></tbody>
+                </table>    
+
+                <br>
+                <h3>Registrar Nuevo Producto en el Sistema</h3>
+                <div style="display: flex; gap: 10px; margin-top: 10px;">
+                    <input type="text" id="nuevoProducto" placeholder="Nombre del producto">
+                    <input type="number" id="nuevoPrecio" placeholder="Precio base">
+
+                    <select id="nuevoIva">
+                        <option value="true">Con IVA (15%)</option>
+                        <option value="false">Sin IVA (0%)</option>
+                    </select>
+
+                    <button onclick="agregarProductoLista()" style="background: #2ea44f; color: white;">
+                        Registrar en Inventario
+                    </button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <footer class="pie-pagina">
+        <p>SISTEMA DE TIENDA</p>
+        <p>Desarrollador: <span>Jefferson Quispe</span></p>
+    </footer>
+
+    <script src="facturacion.js"></script>
+    <script src="quiz.js"></script>
+</body>
+</html>
