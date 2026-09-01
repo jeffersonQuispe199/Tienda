@@ -1,4 +1,3 @@
-
 /* ==========================================================================
    FONDO DE PÁGINA CON IMAGEN Y EFECTO BORROSO (BLUR)
    ========================================================================== */
@@ -13,25 +12,16 @@ body::before {
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
-    /* Controla qué tan borroso se ve (puedes subir a 8px o bajar a 3px) */
     filter: blur(5px); 
-    /* Oscurece un poco la imagen para que resalten más tus cards */
     opacity: 0.4; 
-    z-index: -1; /* Envía la imagen al fondo de todo */
-    pointer-events: none; /* Evita que interfiera con los clics en la app */
+    z-index: -1; 
+    pointer-events: none; 
 }
 
-body {
-    background: #0d1117; /* Mantiene un fondo base oscuro por si la imagen tarda en cargar */
-    color: #c9d1d9;
-    padding: 20px;
-    min-height: 100vh;
-}
 /* ==========================================================================
-   ESTILOS GENERALES - ESTILO TECNOLÓGICO / FUTURISTA
+   ESTILOS GENERALES Y RESET RESPONSIVO
    ========================================================================== */
-
-   * {
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
@@ -39,17 +29,20 @@ body {
 }
 
 body {
-    background: #0d1117; /* Fondo oscuro tipo GitHub/VSC */
-    color: #c9d1d9; /* Texto claro de baja fatiga visual */
+    background: #0d1117; 
+    color: #c9d1d9;
     padding: 20px;
+    min-height: 100vh;
+    font-size: 16px;
 }
 
 .contenedor {
+    width: 100%;
     max-width: 1200px;
-    margin: auto;
+    margin: 0 auto;
 }
 
-/* Tarjetas con efecto de cristal esmerilado y borde de neón sutil */
+/* Tarjetas con efecto de cristal esmerilado */
 .card {
     background: #161b22;
     padding: 25px;
@@ -60,7 +53,7 @@ body {
 }
 
 h1 {
-    color: #58a6ff; /* Azul tecnológico brillante */
+    color: #58a6ff; 
     font-weight: 700;
     letter-spacing: 1px;
     text-transform: uppercase;
@@ -120,7 +113,6 @@ h2 {
     }
 }
 
-/* Ajuste del efecto LED 3D cuando pasa a Modo Claro */
 body.light-theme .led-3d-animacion {
     color: #0969da;
     animation: brilloLed3DClaro 3s infinite ease-in-out;
@@ -159,11 +151,20 @@ body.light-theme .led-3d-animacion {
     letter-spacing: 2px;
 }
 
-/* Tablas con diseño de matriz de datos */
+/* ==========================================================================
+   TABLAS RESPONSIVAS CON SCROLL HORIZONTAL
+   ========================================================================== */
+.tabla-responsive {
+    width: 100%;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    margin: 15px 0;
+}
+
 table {
     width: 100%;
+    min-width: 600px; /* Garantiza legibilidad en pantallas pequeñas */
     border-collapse: collapse;
-    margin: 20px 0;
     background: #0d1117;
     border-radius: 8px;
     overflow: hidden;
@@ -186,7 +187,9 @@ td {
     text-align: center;
 }
 
-/* Controles, Inputs y Selects Futuristas */
+/* ==========================================================================
+   CONTROLES, INPUTS Y BOTONES
+   ========================================================================== */
 input, select {
     width: 100%;
     padding: 12px;
@@ -205,7 +208,6 @@ input:focus, select:focus {
     background: #161b22;
 }
 
-/* Botones con transiciones de interfaz de comandos */
 button {
     background: #21262d;
     color: #c9d1d9;
@@ -225,7 +227,6 @@ button:hover {
     box-shadow: 0 0 12px rgba(88, 166, 255, 0.4);
 }
 
-/* Estilo específico para botones de acción peligrosa o eliminación (X) */
 td button {
     background: #21262d;
     color: #f85149;
@@ -240,13 +241,17 @@ td button:hover {
     box-shadow: 0 0 10px rgba(248, 81, 73, 0.4);
 }
 
-/* Menú de navegación estilo Dashboard */
+/* ==========================================================================
+   MENÚ DE NAVEGACIÓN FLEXIBLE
+   ========================================================================== */
 .menu {
     background: #161b22;
     padding: 12px;
     display: flex;
+    flex-wrap: wrap;
     justify-content: center;
-    gap: 12px;
+    align-items: center;
+    gap: 10px;
     margin-bottom: 25px;
     border-radius: 12px;
     border: 1px solid #30363d;
@@ -256,6 +261,8 @@ td button:hover {
     background: transparent;
     color: #8b949e;
     border: 1px solid transparent;
+    flex: 1 1 auto;
+    min-width: 130px;
 }
 
 .menu button:hover {
@@ -265,18 +272,52 @@ td button:hover {
     box-shadow: none;
 }
 
-/* Grid de distribución en Facturación */
+/* ==========================================================================
+   GRIDS Y CONTENEDORES RESPONSIVOS
+   ========================================================================== */
 .grid {
     display: grid;
-    grid-template-columns: repeat(4, 1fr);
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 15px;
     align-items: end;
 }
 
-@media(max-width:900px){
-    .grid {
-        grid-template-columns: 1fr;
-    }
+.form-linea-flex {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.form-linea-flex input,
+.form-linea-flex select,
+.form-linea-flex button {
+    flex: 1 1 200px;
+}
+
+/* Sección de Totales en Facturación */
+.totales {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    width: 100%;
+    margin-top: 20px;
+}
+
+.box-total {
+    width: 100%;
+    max-width: 400px;
+    background: #161b22;
+    padding: 20px;
+    border-radius: 8px;
+    border: 1px solid #30363d;
+}
+
+.linea {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
 }
 
 .oculto {
@@ -284,7 +325,7 @@ td button:hover {
 }
 
 /* ==========================================================================
-   ESTILOS PARA EL PIE DE PÁGINA (FOOTER)
+   PIE DE PÁGINA (FOOTER)
    ========================================================================== */
 .pie-pagina {
     margin-top: 50px;
@@ -307,14 +348,8 @@ td button:hover {
     font-weight: 600;
 }
 
-@media print {
-    .pie-pagina {
-        display: none !important;
-    }
-}
-
 /* ==========================================================================
-   CORRECCIÓN CRÍTICA DE CONTRASTE PARA EL MINI QUIZ
+   MINI QUIZ Y PORTADA
    ========================================================================== */
 #contenedorQuiz p {
     color: #58a6ff !important;
@@ -347,9 +382,6 @@ td button:hover {
     accent-color: #1f3c88;
 }
 
-/* ==========================================================================
-   OPTIMIZACIÓN DE TAMAÑO PARA INPUTS EN LA PORTADA
-   ========================================================================== */
 #portada input[type="text"],
 #portada input[type="number"] {
     width: auto;
@@ -374,14 +406,13 @@ td button:hover {
     vertical-align: middle;
 }
 
-/* ==========================================================================
-   ESTILIZACIÓN PARA LOGO EN IMAGEN CON BORDES SÚPER REDONDEADOS
-   ========================================================================== */
+/* LOGO */
 .logo-contenedor {
+    width: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    margin-bottom: 20px;
+    margin-bottom: 10px;
 }
 
 .logo-img {
@@ -402,14 +433,12 @@ td button:hover {
     border-color: #79c0ff;
 }
 
-/* ==========================================================================
-   BOTÓN COMPLETAMENTE FIJO DE TEMA (SUPERIOR DERECHA)
-   ========================================================================== */
+/* BOTÓN TEMA FLOTANTE */
 .btn-tema-flotante {
-    position: fixed; /* Mantiene el botón inmóvil en pantalla al hacer scroll */
+    position: fixed;
     top: 20px;
     right: 20px;
-    z-index: 99999; /* Prioridad máxima por encima de cualquier modal o menú */
+    z-index: 99999;
     background: #161b22;
     color: #58a6ff;
     border: 1px solid #30363d;
@@ -429,14 +458,14 @@ td button:hover {
     transform: scale(1.05);
 }
 
-@media print {
-    .btn-tema-flotante {
-        display: none !important;
-    }
+/* MODAL DE CONTABILIDAD */
+#modalLoginContabilidad .card {
+    width: 90% !important;
+    max-width: 400px;
 }
 
 /* ==========================================================================
-   ESTILOS ADAPTATIVOS PARA EL MODO CLARO (.light-theme)
+   MODO CLARO (.light-theme)
    ========================================================================== */
 body.light-theme {
     background: #f4f6f9;
@@ -457,7 +486,8 @@ body.light-theme .btn-tema-flotante:hover {
 
 body.light-theme .card, 
 body.light-theme .menu,
-body.light-theme .titulo {
+body.light-theme .titulo,
+body.light-theme .box-total {
     background: #ffffff;
     border-color: #d0d7de;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
@@ -527,15 +557,65 @@ body.light-theme .pie-pagina {
     background: #ffffff;
     border-top: 1px solid #d0d7de;
 }
-/* Correcciones de visualización en impresión para el módulo contable */
+
+body.light-theme #totalGananciasAcumuladas {
+    color: #0969da !important;
+}
+
+/* ==========================================================================
+   MEDIA QUERIES - DISPOSITIVOS MÓVILES
+   ========================================================================== */
+@media (max-width: 600px) {
+    body {
+        padding: 10px;
+    }
+
+    .led-3d-animacion {
+        font-size: 1.8rem;
+    }
+
+    .card {
+        padding: 15px;
+    }
+
+    .menu {
+        flex-direction: column;
+    }
+
+    .menu button {
+        width: 100%;
+    }
+
+    .btn-tema-flotante {
+        position: static;
+        display: block;
+        width: 100%;
+        margin-bottom: 15px;
+        border-radius: 6px;
+    }
+
+    .totales {
+        align-items: stretch;
+    }
+
+    .box-total {
+        max-width: 100%;
+    }
+
+    .totales div[style*="display: flex"] {
+        flex-direction: column;
+    }
+
+    .totales button {
+        width: 100%;
+    }
+}
+
 @media print {
+    .pie-pagina,
+    .btn-tema-flotante,
     #contabilidad button, 
     #contabilidad h4 {
         display: none !important;
     }
-}
-
-/* Adaptación del layout contable al Modo Claro */
-body.light-theme #totalGananciasAcumuladas {
-    color: #0969da !important;
 }
