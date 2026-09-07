@@ -163,7 +163,7 @@ body.light-theme .led-3d-animacion {
 
 table {
     width: 100%;
-    min-width: 600px; /* Garantiza legibilidad en pantallas pequeñas */
+    min-width: 600px;
     border-collapse: collapse;
     background: #0d1117;
     border-radius: 8px;

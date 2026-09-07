@@ -4,15 +4,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini Facturador</title>
+    <title>Mini Facturador - Víveres DARIO</title>
     <link rel="stylesheet" href="apariencia.css">
+    <!-- Librería para lectura de códigos de barras y QR con la cámara -->
+    <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
 <body>
 
     <button id="btn-tema" class="btn-tema-flotante" onclick="alternarTema()">🌙 Modo Oscuro</button>
     <div class="titulo">
-        <h1 class="led-3d-animacion">Viveres DARIO</h1>            
+        <h1 class="led-3d-animacion">Víveres DARIO</h1>            
     </div>
     <br><br>
     <div class="menu">
@@ -146,13 +148,13 @@
         </div>
 
         <!-- SECCIÓN: FACTURACIÓN -->
-        <div id="facturacion" class="seccion oculto">
+        <div id="facturacion" class="seccion">
             <div class="card">
                 <h2>COMPRA DE PRODUCTOS</h2>
                 <div class="grid">
                     <div>
-                        <label>Producto o Código</label>
-                        <input type="text" id="producto" placeholder="Escribe el nombre o código...">
+                        <label>Producto o Código de Barras</label>
+                        <input type="text" id="producto" placeholder="Nombre o escanea código..." autofocus>
                     </div>
                     <div>
                         <label>Cantidad</label>
@@ -162,9 +164,16 @@
                         <label>Precio</label>
                         <input type="number" id="precio" step="0.01">
                     </div>
-                    <div class="boton">
-                        <button onclick="agregarProducto()" style="background: #58a6ff; color: #0d1117; width: 100%;">Agregar a la Factura</button>
+                    <div class="boton" style="display: flex; gap: 5px;">
+                        <button onclick="agregarProducto()" style="background: #58a6ff; color: #0d1117; flex: 2;">Agregar a Factura</button>
+                        <button onclick="iniciarEscaneoCamara()" style="background: #2ea44f; color: white; flex: 1;">📷 Cámara</button>
                     </div>
+                </div>
+
+                <!-- Visor para la cámara del móvil -->
+                <div id="contenedorLectorCamara" style="display: none; margin-top: 15px; text-align: center;">
+                    <div id="reader" style="width: 100%; max-width: 400px; margin: 0 auto; border: 2px solid #58a6ff; border-radius: 8px; overflow: hidden;"></div>
+                    <button onclick="detenerEscaneoCamara()" style="margin-top: 10px; background: #cf222e; color: white;">Cerrar Cámara</button>
                 </div>
 
                 <div class="tabla-responsive">

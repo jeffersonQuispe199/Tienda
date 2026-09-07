@@ -9,7 +9,7 @@ const CREDANCIALES_CONTABILIDAD = {
 };
 let accesoContabilidadConcedido = false;
 
-// PERSISTENCIA DE PRODUCTOS (CON CÓDIGO, CANTIDAD Y STOCK MÁXIMO PARA %)
+// PERSISTENCIA DE PRODUCTOS
 const productosPorDefecto = [
   { codigo: "P001", nombre: "Arroz", precio: 2.50, cantidad: 50, stockMaximo: 100, iva: true },
   { codigo: "P002", nombre: "Leche", precio: 1.20, cantidad: 30, stockMaximo: 100, iva: true },
@@ -750,6 +750,86 @@ function agregarProductoLista() {
     asignarAutocompletadoFactura();
 
     alert("¡Producto registrado exitosamente en el inventario!");
+}
+
+// ==========================================================================
+// INTEGRACIÓN DE ESCÁNER DE CÓDIGOS DE BARRAS (FÍSICO Y CÁMARA)
+// ==========================================================================
+
+let html5QrcodeScanner = null;
+
+// Escáner Físico (USB/Bluetooth): Detecta el 'Enter' enviado por el lector al escanear
+document.getElementById("producto")?.addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        let codigoEscaneado = this.value.trim();
+        if (codigoEscaneado !== "") {
+            procesarCodigoEscaneado(codigoEscaneado);
+        }
+    }
+});
+
+// Función para buscar y agregar producto escaneado
+function procesarCodigoEscaneado(codigo) {
+    let productoEncontrado = listaProductos.find(p => 
+        p.codigo && p.codigo.toLowerCase() === codigo.toLowerCase()
+    );
+
+    if (productoEncontrado) {
+        document.getElementById("producto").value = productoEncontrado.nombre;
+        document.getElementById("precio").value = productoEncontrado.precio;
+        
+        let ivaSelectFactura = document.getElementById("iva");
+        if (ivaSelectFactura) {
+            ivaSelectFactura.value = productoEncontrado.iva ? 15 : 0;
+        }
+
+        agregarProducto();
+    } else {
+        alert("Producto no encontrado con el código: " + codigo);
+        document.getElementById("producto").value = codigo;
+        document.getElementById("producto").focus();
+    }
+}
+
+// Escáner vía Cámara Móvil
+function iniciarEscaneoCamara() {
+    let contenedor = document.getElementById("contenedorLectorCamara");
+    if (contenedor) contenedor.style.display = "block";
+
+    if (!html5QrcodeScanner) {
+        html5QrcodeScanner = new Html5Qrcode("reader");
+    }
+
+    const config = { fps: 10, qrbox: { width: 250, height: 150 } };
+
+    html5QrcodeScanner.start(
+        { facingMode: "environment" },
+        config,
+        (decodedText) => {
+            detenerEscaneoCamara();
+            procesarCodigoEscaneado(decodedText);
+        },
+        (errorMessage) => {
+            // Buscando código de barras...
+        }
+    ).catch(err => {
+        alert("No se pudo acceder a la cámara: " + err);
+        if (contenedor) contenedor.style.display = "none";
+    });
+}
+
+function detenerEscaneoCamara() {
+    let contenedor = document.getElementById("contenedorLectorCamara");
+    if (html5QrcodeScanner) {
+        html5QrcodeScanner.stop().then(() => {
+            if (contenedor) contenedor.style.display = "none";
+        }).catch(err => {
+            if (contenedor) contenedor.style.display = "none";
+        });
+    } else if (contenedor) {
+        contenedor.style.display = "none";
+    }
 }
 
 // INICIALIZACIÓN
