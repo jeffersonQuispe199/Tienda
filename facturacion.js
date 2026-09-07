@@ -9,13 +9,13 @@ const CREDANCIALES_CONTABILIDAD = {
 };
 let accesoContabilidadConcedido = false;
 
-// PERSISTENCIA DE PRODUCTOS (CON / SIN IVA)
+// PERSISTENCIA DE PRODUCTOS (CON CÓDIGO, CANTIDAD Y STOCK MÁXIMO PARA %)
 const productosPorDefecto = [
-  { nombre: "Arroz", precio: 2.50, iva: true },
-  { nombre: "Leche", precio: 1.20, iva: true },
-  { nombre: "Pan", precio: 0.50, iva: false },
-  { nombre: "Queso", precio: 3.00, iva: true },
-  { nombre: "Agua", precio: 0.80, iva: false }
+  { codigo: "P001", nombre: "Arroz", precio: 2.50, cantidad: 50, stockMaximo: 100, iva: true },
+  { codigo: "P002", nombre: "Leche", precio: 1.20, cantidad: 30, stockMaximo: 100, iva: true },
+  { codigo: "P003", nombre: "Pan", precio: 0.50, cantidad: 80, stockMaximo: 100, iva: false },
+  { codigo: "P004", nombre: "Queso", precio: 3.00, cantidad: 20, stockMaximo: 50, iva: true },
+  { codigo: "P005", nombre: "Agua", precio: 0.80, cantidad: 60, stockMaximo: 100, iva: false }
 ];
 
 let listaProductos = JSON.parse(localStorage.getItem("productos_sistema")) || productosPorDefecto;
@@ -41,15 +41,17 @@ function pintarProductos(lista) {
         let ivaValor = lista[i].precio * (ivaPorcentaje / 100);
         let total = lista[i].precio + ivaValor;
 
+        let maxStock = lista[i].stockMaximo || 100;
+        let porcentajeStock = ((lista[i].cantidad / maxStock) * 100).toFixed(1);
+
         if (indiceEditando === i) {
             contenido += `
             <tr>
-                <td>
-                    <input type="text" id="editNombre" value="${lista[i].nombre}" style="width: 90%; padding: 4px;">
-                </td>
-                <td>
-                    <input type="number" id="editPrecio" step="0.01" value="${lista[i].precio}" style="width: 70%; padding: 4px;">
-                </td>
+                <td><input type="text" id="editCodigo" value="${lista[i].codigo || ''}" style="width: 80px; padding: 4px;"></td>
+                <td><input type="text" id="editNombre" value="${lista[i].nombre}" style="width: 90%; padding: 4px;"></td>
+                <td><input type="number" id="editPrecio" step="0.01" value="${lista[i].precio}" style="width: 70px; padding: 4px;"></td>
+                <td><input type="number" id="editCantidad" value="${lista[i].cantidad || 0}" style="width: 60px; padding: 4px;"></td>
+                <td>${porcentajeStock}%</td>
                 <td>
                     <select id="editIva" style="padding: 4px;">
                         <option value="true" ${lista[i].iva ? 'selected' : ''}>15%</option>
@@ -67,8 +69,11 @@ function pintarProductos(lista) {
         } else {
             contenido += `
             <tr>
+                <td><strong>${lista[i].codigo || 'S/C'}</strong></td>
                 <td>${lista[i].nombre}</td>
                 <td>$${lista[i].precio.toFixed(2)}</td>
+                <td>${lista[i].cantidad || 0} u.</td>
+                <td><span style="color: ${porcentajeStock < 20 ? '#f85149' : '#2ea44f'}; font-weight: bold;">${porcentajeStock}%</span></td>
                 <td>${ivaPorcentaje}%</td>
                 <td>$${ivaValor.toFixed(2)}</td>
                 <td>$${total.toFixed(2)}</td>
@@ -94,8 +99,10 @@ function cancelarEdicionProducto() {
 }
 
 function guardarEdicionProducto(indice) {
+    let nuevoCodigo = document.getElementById("editCodigo").value.trim();
     let nuevoNombre = document.getElementById("editNombre").value.trim();
     let nuevoPrecio = parseFloat(document.getElementById("editPrecio").value);
+    let nuevaCantidad = parseInt(document.getElementById("editCantidad").value) || 0;
     let nuevoIva = document.getElementById("editIva").value === "true";
 
     if (nuevoNombre === "" || isNaN(nuevoPrecio) || nuevoPrecio <= 0) {
@@ -103,15 +110,20 @@ function guardarEdicionProducto(indice) {
         return;
     }
 
-    let existe = listaProductos.some((p, idx) => p.nombre.toLowerCase() === nuevoNombre.toLowerCase() && idx !== indice);
+    let existe = listaProductos.some((p, idx) => 
+        (p.nombre.toLowerCase() === nuevoNombre.toLowerCase() || (nuevoCodigo !== "" && p.codigo && p.codigo.toLowerCase() === nuevoCodigo.toLowerCase())) && idx !== indice
+    );
     if (existe) {
-        alert("Ya existe otro producto con este nombre.");
+        alert("Ya existe otro producto con este nombre o código.");
         return;
     }
 
     listaProductos[indice] = {
+        ...listaProductos[indice],
+        codigo: nuevoCodigo,
         nombre: nuevoNombre,
         precio: nuevoPrecio,
+        cantidad: nuevaCantidad,
         iva: nuevoIva
     };
 
@@ -138,7 +150,10 @@ function asignarAutocompletadoFactura() {
         let precioInput = document.getElementById("precio");
         let ivaSelectFactura = document.getElementById("iva");
 
-        let productoEncontrado = listaProductos.find(p => p.nombre.toLowerCase() === textoEscrito);
+        let productoEncontrado = listaProductos.find(p => 
+            p.nombre.toLowerCase() === textoEscrito || 
+            (p.codigo && p.codigo.toLowerCase() === textoEscrito)
+        );
 
         if (productoEncontrado) {
             precioInput.value = productoEncontrado.precio;
@@ -160,7 +175,12 @@ function agregarProducto() {
         return;
     }
 
-    let productoEncontrado = listaProductos.find(p => p.nombre.toLowerCase() === productoInput.toLowerCase());
+    let productoEncontrado = listaProductos.find(p => 
+        p.nombre.toLowerCase() === productoInput.toLowerCase() || 
+        (p.codigo && p.codigo.toLowerCase() === productoInput.toLowerCase())
+    );
+    
+    let nombreMostrar = productoEncontrado ? productoEncontrado.nombre : productoInput;
     let precioConIva = precio;
 
     if (productoEncontrado && productoEncontrado.iva) {
@@ -170,7 +190,7 @@ function agregarProducto() {
     let subtotal = cantidad * precioConIva;
 
     productos.push({
-        producto: productoInput,
+        producto: nombreMostrar,
         cantidad: cantidad,
         precio: precioConIva,
         subtotal: subtotal
@@ -686,42 +706,54 @@ function imprimirFacturaClientePDF() {
     }, 350);
 }
 
-// INICIALIZACIÓN
-pintarClientes();
-pintarProductos(listaProductos);
-asignarAutocompletadoFactura();
-pintarHistorialContable();
-
 function agregarProductoLista() {
+    let inputCodigo = document.getElementById("nuevoCodigo").value.trim();
     let inputNombre = document.getElementById("nuevoProducto").value.trim();
     let inputPrecio = parseFloat(document.getElementById("nuevoPrecio").value);
+    let inputCantidad = parseInt(document.getElementById("nuevaCantidad").value) || 0;
+    let inputStockMaximo = parseInt(document.getElementById("nuevoStockMaximo").value) || 100;
     let inputIva = document.getElementById("nuevoIva").value === "true";
 
-    if (inputNombre === "" || isNaN(inputPrecio) || inputPrecio <= 0) {
-        alert("Por favor, ingrese un nombre válido y un precio mayor a 0.");
+    if (inputCodigo === "" || inputNombre === "" || isNaN(inputPrecio) || inputPrecio <= 0) {
+        alert("Por favor, ingrese un código, nombre válido y un precio mayor a 0.");
         return;
     }
 
-    let existe = listaProductos.some(p => p.nombre.toLowerCase() === inputNombre.toLowerCase());
+    let existe = listaProductos.some(p => 
+        p.nombre.toLowerCase() === inputNombre.toLowerCase() || 
+        (p.codigo && p.codigo.toLowerCase() === inputCodigo.toLowerCase())
+    );
     if (existe) {
-        alert("Este producto ya está registrado en la lista.");
+        alert("Ya existe un producto registrado con este nombre o código.");
         return;
     }
 
     listaProductos.push({
+        codigo: inputCodigo,
         nombre: inputNombre,
         precio: inputPrecio,
+        cantidad: inputCantidad,
+        stockMaximo: inputStockMaximo,
         iva: inputIva
     });
 
     localStorage.setItem("productos_sistema", JSON.stringify(listaProductos));
 
+    document.getElementById("nuevoCodigo").value = "";
     document.getElementById("nuevoProducto").value = "";
     document.getElementById("nuevoPrecio").value = "";
+    document.getElementById("nuevaCantidad").value = "";
+    document.getElementById("nuevoStockMaximo").value = "";
     document.getElementById("nuevoIva").value = "true";
 
     pintarProductos(listaProductos);
     asignarAutocompletadoFactura();
 
-    alert("¡Producto guardado exitosamente en el sistema!");
+    alert("¡Producto registrado exitosamente en el inventario!");
 }
+
+// INICIALIZACIÓN
+pintarClientes();
+pintarProductos(listaProductos);
+asignarAutocompletadoFactura();
+pintarHistorialContable();

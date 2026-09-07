@@ -12,12 +12,12 @@
 
     <button id="btn-tema" class="btn-tema-flotante" onclick="alternarTema()">🌙 Modo Oscuro</button>
     <div class="titulo">
-        <h1 class="led-3d-animacion">Tienda</h1>            
+        <h1 class="led-3d-animacion">Viveres DARIO</h1>            
     </div>
     <br><br>
     <div class="menu">
         <div class="logo-contenedor">
-            <img src="logo.png" alt="Logo CoreFact" class="logo-img">
+            <img src="logo.jpg" alt="Logo CoreFact" class="logo-img">
         </div>
         <button onclick="mostrarSeccion('facturacion')">Facturación</button>
         <button onclick="mostrarSeccion('clientes')">Clientes</button>
@@ -151,16 +151,16 @@
                 <h2>COMPRA DE PRODUCTOS</h2>
                 <div class="grid">
                     <div>
-                        <label>Producto</label>
-                        <input type="text" id="producto" placeholder="Escribe el producto...">
+                        <label>Producto o Código</label>
+                        <input type="text" id="producto" placeholder="Escribe el nombre o código...">
                     </div>
                     <div>
                         <label>Cantidad</label>
-                        <input type="number" id="cantidad" value="1">
+                        <input type="number" id="cantidad" value="1" min="1">
                     </div>
                     <div>
                         <label>Precio</label>
-                        <input type="number" id="precio">
+                        <input type="number" id="precio" step="0.01">
                     </div>
                     <div class="boton">
                         <button onclick="agregarProducto()" style="background: #58a6ff; color: #0d1117; width: 100%;">Agregar a la Factura</button>
@@ -320,8 +320,11 @@
                     <table>
                         <thead>
                             <tr>
+                                <th>Código</th>
                                 <th>Producto</th>
                                 <th>Precio</th>
+                                <th>Cantidad (Stock)</th>
+                                <th>% Stock Actual</th>
                                 <th>IVA %</th>
                                 <th>IVA $</th>
                                 <th>Total</th>
@@ -335,8 +338,11 @@
                 <br>
                 <h3>Registrar Nuevo Producto en el Sistema</h3>
                 <div class="form-linea-flex">
+                    <input type="text" id="nuevoCodigo" placeholder="Código de producto">
                     <input type="text" id="nuevoProducto" placeholder="Nombre del producto">
-                    <input type="number" id="nuevoPrecio" placeholder="Precio base">
+                    <input type="number" id="nuevoPrecio" placeholder="Precio base" step="0.01">
+                    <input type="number" id="nuevaCantidad" placeholder="Cantidad / Stock actual" min="0">
+                    <input type="number" id="nuevoStockMaximo" placeholder="Stock Máximo / Meta (Para %)" min="1">
 
                     <select id="nuevoIva">
                         <option value="true">Con IVA (15%)</option>
