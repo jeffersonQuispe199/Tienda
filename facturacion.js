@@ -758,19 +758,27 @@ function agregarProductoLista() {
 
 let html5QrcodeScanner = null;
 
-// Escáner Físico (USB/Bluetooth): Detecta el 'Enter' enviado por el lector al escanear
+// Escáner Físico en Facturación (USB/Bluetooth)
 document.getElementById("producto")?.addEventListener("keypress", function(event) {
     if (event.key === "Enter") {
         event.preventDefault();
         let codigoEscaneado = this.value.trim();
         if (codigoEscaneado !== "") {
-            procesarCodigoEscaneado(codigoEscaneado);
+            procesarCodigoEscaneadoFactura(codigoEscaneado);
         }
     }
 });
 
-// Función para buscar y agregar producto escaneado
-function procesarCodigoEscaneado(codigo) {
+// Escáner Físico en Registrar Producto Nuevo (pasa al siguiente campo al escanear)
+document.getElementById("nuevoCodigo")?.addEventListener("keypress", function(event) {
+    if (event.key === "Enter") {
+        event.preventDefault();
+        document.getElementById("nuevoProducto")?.focus();
+    }
+});
+
+// Función para buscar y agregar producto escaneado en Facturación
+function procesarCodigoEscaneadoFactura(codigo) {
     let productoEncontrado = listaProductos.find(p => 
         p.codigo && p.codigo.toLowerCase() === codigo.toLowerCase()
     );
@@ -792,40 +800,60 @@ function procesarCodigoEscaneado(codigo) {
     }
 }
 
-// Escáner vía Cámara Móvil
-function iniciarEscaneoCamara() {
-    let contenedor = document.getElementById("contenedorLectorCamara");
+// Escáner vía Cámara Móvil (Generico para Facturación o Inventario)
+function iniciarEscaneoCamara(modo = 'factura') {
+    let idContenedor = modo === 'factura' ? "contenedorLectorCamaraFactura" : "contenedorLectorCamaraInventario";
+    let idReader = modo === 'factura' ? "readerFactura" : "readerInventario";
+
+    let contenedor = document.getElementById(idContenedor);
     if (contenedor) contenedor.style.display = "block";
 
-    if (!html5QrcodeScanner) {
-        html5QrcodeScanner = new Html5Qrcode("reader");
+    if (html5QrcodeScanner) {
+        html5QrcodeScanner.stop().catch(() => {}).then(() => {
+            activarCamaraQR(idReader, idContenedor, modo);
+        });
+    } else {
+        activarCamaraQR(idReader, idContenedor, modo);
     }
+}
 
+function activarCamaraQR(idReader, idContenedor, modo) {
+    html5QrcodeScanner = new Html5Qrcode(idReader);
     const config = { fps: 10, qrbox: { width: 250, height: 150 } };
 
     html5QrcodeScanner.start(
         { facingMode: "environment" },
         config,
         (decodedText) => {
-            detenerEscaneoCamara();
-            procesarCodigoEscaneado(decodedText);
+            detenerEscaneoCamara(modo);
+            if (modo === 'factura') {
+                procesarCodigoEscaneadoFactura(decodedText);
+            } else if (modo === 'inventario') {
+                document.getElementById("nuevoCodigo").value = decodedText;
+                document.getElementById("nuevoProducto").focus();
+            }
         },
         (errorMessage) => {
             // Buscando código de barras...
         }
     ).catch(err => {
         alert("No se pudo acceder a la cámara: " + err);
+        let contenedor = document.getElementById(idContenedor);
         if (contenedor) contenedor.style.display = "none";
     });
 }
 
-function detenerEscaneoCamara() {
-    let contenedor = document.getElementById("contenedorLectorCamara");
+function detenerEscaneoCamara(modo = 'factura') {
+    let idContenedor = modo === 'factura' ? "contenedorLectorCamaraFactura" : "contenedorLectorCamaraInventario";
+    let contenedor = document.getElementById(idContenedor);
+
     if (html5QrcodeScanner) {
         html5QrcodeScanner.stop().then(() => {
             if (contenedor) contenedor.style.display = "none";
+            html5QrcodeScanner = null;
         }).catch(err => {
             if (contenedor) contenedor.style.display = "none";
+            html5QrcodeScanner = null;
         });
     } else if (contenedor) {
         contenedor.style.display = "none";

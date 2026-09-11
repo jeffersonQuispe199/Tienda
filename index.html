@@ -150,7 +150,7 @@
         <!-- SECCIÓN: FACTURACIÓN -->
         <div id="facturacion" class="seccion">
             <div class="card">
-                <h2>COMPRA DE PRODUCTOS</h2>
+                <h2>$$VENTA DE PRODUCTOS$$</h2>
                 <div class="grid">
                     <div>
                         <label>Producto o Código de Barras</label>
@@ -166,14 +166,14 @@
                     </div>
                     <div class="boton" style="display: flex; gap: 5px;">
                         <button onclick="agregarProducto()" style="background: #58a6ff; color: #0d1117; flex: 2;">Agregar a Factura</button>
-                        <button onclick="iniciarEscaneoCamara()" style="background: #2ea44f; color: white; flex: 1;">📷 Cámara</button>
+                        <button onclick="iniciarEscaneoCamara('factura')" style="background: #2ea44f; color: white; flex: 1;">📷 Cámara</button>
                     </div>
                 </div>
 
-                <!-- Visor para la cámara del móvil -->
-                <div id="contenedorLectorCamara" style="display: none; margin-top: 15px; text-align: center;">
-                    <div id="reader" style="width: 100%; max-width: 400px; margin: 0 auto; border: 2px solid #58a6ff; border-radius: 8px; overflow: hidden;"></div>
-                    <button onclick="detenerEscaneoCamara()" style="margin-top: 10px; background: #cf222e; color: white;">Cerrar Cámara</button>
+                <!-- Visor para la cámara en facturación -->
+                <div id="contenedorLectorCamaraFactura" style="display: none; margin-top: 15px; text-align: center;">
+                    <div id="readerFactura" style="width: 100%; max-width: 400px; margin: 0 auto; border: 2px solid #58a6ff; border-radius: 8px; overflow: hidden;"></div>
+                    <button onclick="detenerEscaneoCamara('factura')" style="margin-top: 10px; background: #cf222e; color: white;">Cerrar Cámara</button>
                 </div>
 
                 <div class="tabla-responsive">
@@ -346,8 +346,18 @@
 
                 <br>
                 <h3>Registrar Nuevo Producto en el Sistema</h3>
+                
+                <!-- Visor para la cámara en la sección Inventario -->
+                <div id="contenedorLectorCamaraInventario" style="display: none; margin-bottom: 15px; text-align: center;">
+                    <div id="readerInventario" style="width: 100%; max-width: 400px; margin: 0 auto; border: 2px solid #2ea44f; border-radius: 8px; overflow: hidden;"></div>
+                    <button onclick="detenerEscaneoCamara('inventario')" style="margin-top: 10px; background: #cf222e; color: white;">Cerrar Cámara</button>
+                </div>
+
                 <div class="form-linea-flex">
-                    <input type="text" id="nuevoCodigo" placeholder="Código de producto">
+                    <div style="display: flex; gap: 5px; flex: 1 1 200px;">
+                        <input type="text" id="nuevoCodigo" placeholder="Código de producto (escanea aquí)">
+                        <button onclick="iniciarEscaneoCamara('inventario')" style="background: #2ea44f; color: white; white-space: nowrap; padding: 0 10px;">📷 Escanear</button>
+                    </div>
                     <input type="text" id="nuevoProducto" placeholder="Nombre del producto">
                     <input type="number" id="nuevoPrecio" placeholder="Precio base" step="0.01">
                     <input type="number" id="nuevaCantidad" placeholder="Cantidad / Stock actual" min="0">
