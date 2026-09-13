@@ -6,7 +6,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mini Facturador - Víveres DARIO</title>
     <link rel="stylesheet" href="apariencia.css">
-    <!-- Librería para lectura de códigos de barras y QR con la cámara -->
     <script src="https://unpkg.com/html5-qrcode"></script>
 </head>
 
@@ -67,48 +66,14 @@
             <div class="card">
                 <h1>Fórmula del Subtotal</h1>
                 <p><strong>Subtotal = Cantidad × Precio</strong></p>
-                <p>Ejemplo: 3 cuadernos × $2.00 = $6.00</p>
             </div>
             <div class="card">
                 <h1>Fórmula del IVA</h1>
                 <p><strong>IVA = Subtotal × Porcentaje IVA</strong></p>
-                <p>Ejemplo: $100 × 15% = $15</p>
             </div>
             <div class="card">
                 <h1>Fórmula del Total</h1>
                 <p><strong>Total = Subtotal + IVA</strong></p>
-                <p>Ejemplo: Subtotal = $100<br>IVA = $15<br>Total = $115</p>
-            </div>
-            <div class="card">
-                <h1>Ejercicio Resuelto</h1>
-                <p>Una tienda vende:</p>
-                <ul>
-                    <li>2 teclados a $20</li>
-                    <li>1 mouse a $10</li>
-                </ul>
-                <p>Subtotal = (2 × 20) + 10 = $50</p>
-                <p>IVA 15% = $7.50</p>
-                <p>Total = $57.50</p>
-            </div>
-            <div class="card">
-                <h1>IVA</h1>
-                <p>El IVA en Ecuador es del 15% que pagas al comprar la mayoría de productos y servicios. 15% productos procesados, ropa, tecnología, repuestos y la mayoría de servicios. 0% Alimentos frescos, educación y transporte. 5% Material de construcción.</p>
-            </div>
-            <div class="card">
-                <h1>Productos Gravados con IVA</h1>
-                <p>En Ecuador, la tarifa general del IVA es del 15% se aplica en la mayoría de bienes y servicios sin embargo productos de primera necesidad, medicamentos y otros servicios esenciales cuentan con una tarifa del 0% para proteger el consumo básico.</p>
-            </div>
-            <div class="card">
-                <h1>Productos Tarifa 0</h1>
-                <p>Los productos con tarifa cero son aquellos que no tienen IVA, normalmente bienes y servicios esenciales para proteger la economía familiar en alimentación, salud y transporte.</p>
-            </div>
-            <div class="card">
-                <h1>SUBTOTAL</h1>
-                <p>Es la suma de los productos sin aplicar el IVA o restar cualquier descuento</p>
-            </div>
-            <div class="card">
-                <h1>Conclusión</h1>
-                <p>La facturación permite registrar ventas de manera organizada, calcular impuestos y obtener el valor final que debe pagar el cliente. Es una herramienta fundamental para cualquier negocio.</p>
             </div>
         </div>
 
@@ -150,7 +115,7 @@
         <!-- SECCIÓN: FACTURACIÓN -->
         <div id="facturacion" class="seccion">
             <div class="card">
-                <h2>$$VENTA DE PRODUCTOS$$</h2>
+                <h2>COMPRA DE PRODUCTOS</h2>
                 <div class="grid">
                     <div>
                         <label>Producto o Código de Barras</label>
@@ -161,16 +126,16 @@
                         <input type="number" id="cantidad" value="1" min="1">
                     </div>
                     <div>
-                        <label>Precio</label>
+                        <label>Precio Venta</label>
                         <input type="number" id="precio" step="0.01">
                     </div>
                     <div class="boton" style="display: flex; gap: 5px;">
-                        <button onclick="agregarProducto()" style="background: #58a6ff; color: #0d1117; flex: 2;">Agregar a Factura</button>
+                        <button onclick="procesarAgregarProducto()" style="background: #58a6ff; color: #0d1117; flex: 2;">Agregar a Factura</button>
                         <button onclick="iniciarEscaneoCamara('factura')" style="background: #2ea44f; color: white; flex: 1;">📷 Cámara</button>
                     </div>
                 </div>
 
-                <!-- Visor para la cámara en facturación -->
+                <!-- Visor Cámara Factura -->
                 <div id="contenedorLectorCamaraFactura" style="display: none; margin-top: 15px; text-align: center;">
                     <div id="readerFactura" style="width: 100%; max-width: 400px; margin: 0 auto; border: 2px solid #58a6ff; border-radius: 8px; overflow: hidden;"></div>
                     <button onclick="detenerEscaneoCamara('factura')" style="margin-top: 10px; background: #cf222e; color: white;">Cerrar Cámara</button>
@@ -182,7 +147,7 @@
                             <tr>
                                 <th>Producto</th>
                                 <th>Cantidad</th>
-                                <th>Precio</th>
+                                <th>Precio Venta</th>
                                 <th>Total</th>
                                 <th>Acción</th>
                             </tr>
@@ -254,22 +219,38 @@
             </div>
         </div>
 
-        <!-- MODAL DE AUTENTICACIÓN PARA CONTABILIDAD -->
+        <!-- MODAL SELECCIÓN TEMPERATURA (LÍQUIDOS) -->
+        <div id="modalTemperatura" class="oculto" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 2000;">
+            <div class="card" style="text-align: center; background: #161b22; border: 1px solid #58a6ff; padding: 25px; border-radius: 10px; width: 320px;">
+                <h3 style="color: #58a6ff; margin-top: 0;">🥤 Producto Líquido</h3>
+                <p style="color: #c9d1d9; font-size: 0.95rem;">Seleccione la temperatura de entrega:</p>
+                <div style="display: flex; flex-direction: column; gap: 12px; margin-top: 20px;">
+                    <button onclick="confirmarAgregarLiquido('clima')" style="background: #e3b341; color: #0d1117; font-weight: bold; padding: 12px; border-radius: 6px;">
+                        ☀️ Al Clima (Sin recargo)
+                    </button>
+                    <button onclick="confirmarAgregarLiquido('frio')" style="background: #58a6ff; color: #0d1117; font-weight: bold; padding: 12px; border-radius: 6px;">
+                        ❄️ Frío (+ $0.10)
+                    </button>
+                    <button onclick="cerrarModalTemperatura()" style="background: #21262d; color: #8b949e; padding: 8px; border-radius: 6px; margin-top: 5px;">
+                        Cancelar
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL LOGIN CONTABILIDAD -->
         <div id="modalLoginContabilidad" class="oculto" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000;">
             <div class="card" style="text-align: center; border: 1px solid #30363d; background: #161b22; padding: 25px; border-radius: 8px;">
                 <h2 style="color: #58a6ff; margin-bottom: 15px;">🔒 Acceso Restringido</h2>
                 <p style="color: #8b949e; font-size: 0.9rem; margin-bottom: 20px;">Ingresa tus credenciales para ver la contabilidad.</p>
-                
                 <div style="text-align: left; margin-bottom: 15px;">
                     <label>Usuario</label>
                     <input type="text" id="usuarioContabilidad" placeholder="Usuario admin" style="width: 100%; margin-top: 5px;">
                 </div>
-                
                 <div style="text-align: left; margin-bottom: 20px;">
                     <label>Contraseña</label>
                     <input type="password" id="claveContabilidad" placeholder="••••••••" style="width: 100%; margin-top: 5px;" onkeypress="evaluarTeclaLogin(event)">
                 </div>
-
                 <div style="display: flex; gap: 10px;">
                     <button onclick="cerrarModalLogin()" style="background: #21262d; color: #c9d1d9; flex: 1;">Cancelar</button>
                     <button onclick="validarAccesoContabilidad()" style="background: #238636; color: white; flex: 1;">Ingresar</button>
@@ -277,23 +258,36 @@
             </div>
         </div>
 
-        <!-- SECCIÓN: CONTABILIDAD (PROTEGIDA) -->
+        <!-- SECCIÓN: CONTABILIDAD -->
         <div id="contabilidad" class="seccion oculto">
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; flex-wrap: wrap; gap: 10px;">
-                    <h2 style="margin: 0;">Contabilidad e Historial de Ganancias</h2>
+                    <h2 style="margin: 0;">Resumen Contable y Control de Inventario</h2>
                     <button onclick="cerrarSesionContabilidad()" style="background: #cf222e; color: white; padding: 6px 12px; font-size: 0.85rem;">🔒 Cerrar Sesión</button>
                 </div>
                 
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding: 15px; background: #0d1117; border: 1px solid #30363d; border-radius: 8px; flex-wrap: wrap; gap: 15px;">
-                    <div>
-                        <h4 style="margin: 0; color: #8b949e; letter-spacing: 1px;">GANANCIAS ACUMULADAS TOTALES</h4>
-                        <h1 id="totalGananciasAcumuladas" style="font-size: 2.5rem; color: #58a6ff; margin-top: 5px;">$ 0.00</h1>
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+                    <div style="background: #0d1117; border: 1px solid #30363d; padding: 15px; border-radius: 8px; text-align: center;">
+                        <h4 style="margin: 0; color: #8b949e; font-size: 0.85rem;">VENTAS TOTALES (BRUTO)</h4>
+                        <h2 id="metricaVentasBrutas" style="font-size: 1.8rem; color: #c9d1d9; margin: 8px 0 0 0;">$ 0.00</h2>
                     </div>
-                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
-                        <button onclick="exportarContabilidadExcel()" style="background: #238636; color: white; border-color: #238636; padding: 12px 25px;">📊 Imprimir en Excel</button>
-                        <button onclick="vaciarHistorialContable()" style="background: #21262d; color: #f85149; border-color: #f85149; padding: 12px 15px;">Borrar Historial</button>
+                    <div style="background: #0d1117; border: 1px solid #30363d; padding: 15px; border-radius: 8px; text-align: center;">
+                        <h4 style="margin: 0; color: #8b949e; font-size: 0.85rem;">COSTO MERCADERÍA VENDIDA</h4>
+                        <h2 id="metricaCostoVendido" style="font-size: 1.8rem; color: #f85149; margin: 8px 0 0 0;">$ 0.00</h2>
                     </div>
+                    <div style="background: #0d1117; border: 1px solid #238636; padding: 15px; border-radius: 8px; text-align: center;">
+                        <h4 style="margin: 0; color: #2ea44f; font-size: 0.85rem;">GANANCIA NETA (LIMPIA)</h4>
+                        <h2 id="metricaGananciaNeta" style="font-size: 1.8rem; color: #2ea44f; margin: 8px 0 0 0;">$ 0.00</h2>
+                    </div>
+                    <div style="background: #0d1117; border: 1px solid #1f6beb; padding: 15px; border-radius: 8px; text-align: center;">
+                        <h4 style="margin: 0; color: #58a6ff; font-size: 0.85rem;">VALOR EN PRODUCTO (COSTO STOCK)</h4>
+                        <h2 id="metricaInversionStock" style="font-size: 1.8rem; color: #58a6ff; margin: 8px 0 0 0;">$ 0.00</h2>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <button onclick="exportarContabilidadExcel()" style="background: #238636; color: white; padding: 10px 20px;">📊 Imprimir en Excel</button>
+                    <button onclick="vaciarHistorialContable()" style="background: #21262d; color: #f85149; padding: 10px 15px;">Borrar Historial</button>
                 </div>
 
                 <div class="tabla-responsive">
@@ -331,12 +325,14 @@
                             <tr>
                                 <th>Código</th>
                                 <th>Producto</th>
-                                <th>Precio</th>
-                                <th>Cantidad (Stock)</th>
-                                <th>% Stock Actual</th>
+                                <th>P. Compra</th>
+                                <th>P. Venta</th>
+                                <th>Ganancia</th>
+                                <th>Margen</th>
+                                <th>Stock</th>
+                                <th>Líquido</th>
                                 <th>IVA %</th>
-                                <th>IVA $</th>
-                                <th>Total</th>
+                                <th>Total + IVA</th>
                                 <th>Acción</th>
                             </tr>
                         </thead>
@@ -347,7 +343,6 @@
                 <br>
                 <h3>Registrar Nuevo Producto en el Sistema</h3>
                 
-                <!-- Visor para la cámara en la sección Inventario -->
                 <div id="contenedorLectorCamaraInventario" style="display: none; margin-bottom: 15px; text-align: center;">
                     <div id="readerInventario" style="width: 100%; max-width: 400px; margin: 0 auto; border: 2px solid #2ea44f; border-radius: 8px; overflow: hidden;"></div>
                     <button onclick="detenerEscaneoCamara('inventario')" style="margin-top: 10px; background: #cf222e; color: white;">Cerrar Cámara</button>
@@ -355,13 +350,19 @@
 
                 <div class="form-linea-flex">
                     <div style="display: flex; gap: 5px; flex: 1 1 200px;">
-                        <input type="text" id="nuevoCodigo" placeholder="Código de producto (escanea aquí)">
+                        <input type="text" id="nuevoCodigo" placeholder="Código (escanea aquí)">
                         <button onclick="iniciarEscaneoCamara('inventario')" style="background: #2ea44f; color: white; white-space: nowrap; padding: 0 10px;">📷 Escanear</button>
                     </div>
                     <input type="text" id="nuevoProducto" placeholder="Nombre del producto">
-                    <input type="number" id="nuevoPrecio" placeholder="Precio base" step="0.01">
-                    <input type="number" id="nuevaCantidad" placeholder="Cantidad / Stock actual" min="0">
-                    <input type="number" id="nuevoStockMaximo" placeholder="Stock Máximo / Meta (Para %)" min="1">
+                    <input type="number" id="nuevoPrecioCompra" placeholder="P. Compra ($)" step="0.01">
+                    <input type="number" id="nuevoPrecioVenta" placeholder="P. Venta ($)" step="0.01">
+                    <input type="number" id="nuevaCantidad" placeholder="Stock" min="0">
+                    <input type="number" id="nuevoStockMaximo" placeholder="Stock Máx" min="1">
+
+                    <select id="nuevoEsLiquido">
+                        <option value="false">Solido / Normal</option>
+                        <option value="true">🥤 Es Líquido (Frío/Clima)</option>
+                    </select>
 
                     <select id="nuevoIva">
                         <option value="true">Con IVA (15%)</option>
@@ -369,7 +370,7 @@
                     </select>
 
                     <button onclick="agregarProductoLista()" style="background: #2ea44f; color: white;">
-                        Registrar en Inventario
+                        Registrar
                     </button>
                 </div>
             </div>
