@@ -125,9 +125,11 @@ function eliminarProductoLista(nombre) {
     pintarHistorialContable();
 }
 
+// AUTOCOMPLETADO Y CAPTURA DE TECLA ENTER (PARA LECTORES DE CÓDIGO FÍSICOS)
 function asignarAutocompletadoFactura() {
     let input = document.getElementById("producto");
     if (!input) return;
+
     input.addEventListener("input", function() {
         let txt = this.value.trim().toLowerCase();
         let prod = listaProductos.find(p => p.nombre.toLowerCase() === txt || (p.codigo && p.codigo.toLowerCase() === txt));
@@ -137,23 +139,37 @@ function asignarAutocompletadoFactura() {
             if (ivaSel) { ivaSel.value = prod.iva ? 15 : 0; calcularTotales(); }
         }
     });
+
+    input.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            procesarAgregarProducto();
+        }
+    });
 }
 
-// EVALUAR Y AGREGAR PRODUCTO A FACTURA (CON MODAL LÍQUIDOS)
+// EVALUAR Y AGREGAR PRODUCTO A FACTURA
 function procesarAgregarProducto() {
     let productoInput = document.getElementById("producto").value.trim();
     let cantidad = parseFloat(document.getElementById("cantidad").value);
     let precio = parseFloat(document.getElementById("precio").value);
 
-    if (productoInput === "" || cantidad <= 0 || precio <= 0 || isNaN(cantidad) || isNaN(precio)) {
-        alert("Complete los datos del producto correctamente.");
-        return;
-    }
-
+    // Buscar el producto en la lista registrada por Nombre o Código
     let prodEncontrado = listaProductos.find(p => 
         p.nombre.toLowerCase() === productoInput.toLowerCase() || 
         (p.codigo && p.codigo.toLowerCase() === productoInput.toLowerCase())
     );
+
+    // Si el producto existe en inventario pero el campo precio está vacío, asignarlo
+    if (prodEncontrado && (isNaN(precio) || precio <= 0)) {
+        precio = prodEncontrado.precioVenta || prodEncontrado.precio;
+        document.getElementById("precio").value = precio;
+    }
+
+    if (productoInput === "" || isNaN(cantidad) || cantidad <= 0 || isNaN(precio) || precio <= 0) {
+        alert("Complete los datos del producto correctamente o verifique que esté registrado en el Inventario.");
+        return;
+    }
 
     // Si es líquido, abrir modal para seleccionar temperatura
     if (prodEncontrado && prodEncontrado.esLiquido) {
@@ -256,6 +272,7 @@ function limpiarInputs() {
     document.getElementById("producto").value = "";
     document.getElementById("cantidad").value = 1;
     document.getElementById("precio").value = "";
+    document.getElementById("producto").focus();
 }
 
 // CONTROL DE SECCIONES CON ACCESO RETAIL
@@ -386,7 +403,7 @@ function alternarTema() {
     }
 })();
 
-// GUARDAR FACTURA Y DESCONTAR INVENTARIO (COMPATIBLE CON LÍQUIDOS)
+// GUARDAR FACTURA Y DESCONTAR INVENTARIO
 let historialContable = JSON.parse(localStorage.getItem("historial_contabilidad")) || [];
 
 function guardarYLimpiarFactura() {
@@ -403,9 +420,7 @@ function guardarYLimpiarFactura() {
     for (let i = 0; i < productos.length; i++) {
         totalFactura += productos[i].subtotal;
 
-        // Extraer nombre base para líquidos agregados como "Coca Cola (Frío)" o "Coca Cola (Al Clima)"
         let nombreLimpio = productos[i].producto.replace(" (Frío)", "").replace(" (Al Clima)", "").trim();
-
         let prodSistema = listaProductos.find(p => p.nombre.toLowerCase() === nombreLimpio.toLowerCase());
         
         if (prodSistema) {
@@ -473,7 +488,6 @@ function pintarHistorialContable() {
         </tr>`;
     }
 
-    // VALOR DE STOCK BASADO EN PRECIO DE COMPRA
     let valorTotalInventario = listaProductos.reduce((total, p) => {
         let precioCosto = parseFloat(p.precioCompra) || 0;
         let unidades = parseInt(p.cantidad) || 0;
@@ -515,7 +529,6 @@ function exportarContabilidadExcel() {
     a.click();
 }
 
-// GENERAR PDF IMPRESIÓN
 function imprimirFacturaClientePDF() {
     if (productos.length === 0) return;
     let txtCliente = document.getElementById("cliente").value.trim() || "Consumidor Final";
@@ -590,6 +603,13 @@ function iniciarEscaneoCamara(modo = 'factura') {
             detenerEscaneoCamara(modo);
             if (modo === 'factura') {
                 document.getElementById("producto").value = decodedText;
+                
+                // Buscar precio antes de procesar
+                let prod = listaProductos.find(p => p.nombre.toLowerCase() === decodedText.toLowerCase() || (p.codigo && p.codigo.toLowerCase() === decodedText.toLowerCase()));
+                if (prod) {
+                    document.getElementById("precio").value = prod.precioVenta || prod.precio;
+                }
+                
                 procesarAgregarProducto();
             } else {
                 document.getElementById("nuevoCodigo").value = decodedText;
