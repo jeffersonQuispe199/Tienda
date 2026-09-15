@@ -21,8 +21,10 @@
             <img src="logo.jpg" alt="Logo CoreFact" class="logo-img">
         </div>
         <button onclick="mostrarSeccion('facturacion')">Facturación</button>
+       
         <button onclick="mostrarSeccion('clientes')">Clientes</button>
-        <button onclick="mostrarSeccion('productos')">Productos</button>
+        <button onclick="mostrarSeccion('productos')">Productos</button> 
+        <button onclick="mostrarSeccion('compras')"> Compras</button>
         <button onclick="mostrarSeccion('contabilidad')">Contabilidad</button>
         <button onclick="mostrarSeccion('teoria')">Material de Estudio</button>
         <button onclick="mostrarSeccion('quiz')">Mini Quiz</button>
@@ -215,6 +217,89 @@
                 <div style="display: flex; gap: 10px; flex-wrap: wrap; justify-content: flex-end; width: 100%;">
                     <button onclick="imprimirFacturaClientePDF()" style="background: #1f3c88; color: #ffffff; border-color: #1f3c88;">🖨️ Imprimir PDF</button>
                     <button onclick="guardarYLimpiarFactura()" style="background: #2ea44f; color: #ffffff; border-color: #2ea44f;">💾 Guardar Factura</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- SECCIÓN: REGISTRO DE COMPRAS A PROVEEDORES -->
+        <div id="compras" class="seccion oculto">
+            <div class="card">
+                <h2>🛒 REGISTRO DE COMPRAS / REABASTECIMIENTO</h2>
+                <div class="grid">
+                    <div>
+                        <label>Proveedor / Distribuidora</label>
+                        <input type="text" id="compraProveedor" placeholder="Ej. Pronaca, La Fabril...">
+                    </div>
+                    <div>
+                        <label>N° Factura Proveedor</label>
+                        <input type="text" id="compraNumFactura" placeholder="001-001-123456">
+                    </div>
+                </div>
+                <hr style="border-color: #30363d; margin: 15px 0;">
+
+                <div class="grid">
+                    <div>
+                        <label>Buscar Producto (Nombre o Código)</label>
+                        <div style="display: flex; gap: 5px;">
+                            <input type="text" id="compraProductoInput" placeholder="Escribe o escanea código...">
+                            <button onclick="iniciarEscaneoCamara('compras')" style="background: #2ea44f; color: white; white-space: nowrap;">📷 Cámara</button>
+                        </div>
+                    </div>
+                    <div>
+                        <label>Cantidad Comprada</label>
+                        <input type="number" id="compraCantidad" value="1" min="1">
+                    </div>
+                    <div>
+                        <label>Precio Costo Unitario ($)</label>
+                        <input type="number" id="compraPrecioCosto" step="0.01" placeholder="0.00">
+                    </div>
+                    <div>
+                        <button onclick="agregarItemACompra()" style="background: #2ea44f; color: white; width: 100%;">+ Agregar a Lista</button>
+                    </div>
+                </div>
+
+                <!-- Visor Cámara Compras -->
+                <div id="contenedorLectorCamaraCompras" style="display: none; margin-top: 15px; text-align: center;">
+                    <div id="readerCompras" style="width: 100%; max-width: 400px; margin: 0 auto; border: 2px solid #2ea44f; border-radius: 8px; overflow: hidden;"></div>
+                    <button onclick="detenerEscaneoCamara('compras')" style="margin-top: 10px; background: #cf222e; color: white;">Cerrar Cámara</button>
+                </div>
+
+                <div class="tabla-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Producto</th>
+                                <th>Cantidad Ingresada</th>
+                                <th>Costo Unitario</th>
+                                <th>Subtotal Compra</th>
+                                <th>Acción</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaItemsCompra"></tbody>
+                    </table>
+                </div>
+
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 15px; flex-wrap: wrap; gap: 10px;">
+                    <h3 style="color: #58a6ff;">Total Factura Compra: <span id="totalCompraFactura" style="color: #2ea44f;">$0.00</span></h3>
+                    <button onclick="guardarFacturaCompra()" style="background: #0969da; color: white; padding: 12px 25px;">💾 Registrar e Incrementar Stock</button>
+                </div>
+            </div>
+
+            <!-- HISTORIAL DE COMPRAS REGISTRADAS -->
+            <div class="card">
+                <h2>Historial de Compras de Mercadería</h2>
+                <div class="tabla-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Proveedor</th>
+                                <th>N° Factura</th>
+                                <th>Detalle / Items</th>
+                                <th>Total Invertido</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tablaHistorialCompras"></tbody>
+                    </table>
                 </div>
             </div>
         </div>

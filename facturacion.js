@@ -125,7 +125,7 @@ function eliminarProductoLista(nombre) {
     pintarHistorialContable();
 }
 
-// AUTOCOMPLETADO Y CAPTURA DE TECLA ENTER (PARA LECTORES DE CÓDIGO FÍSICOS)
+// AUTOCOMPLETADO Y CAPTURA DE TECLA ENTER (PARA LECTORES DE CÓDIGO FÍSICOS) EN FACTURACIÓN
 function asignarAutocompletadoFactura() {
     let input = document.getElementById("producto");
     if (!input) return;
@@ -154,13 +154,11 @@ function procesarAgregarProducto() {
     let cantidad = parseFloat(document.getElementById("cantidad").value);
     let precio = parseFloat(document.getElementById("precio").value);
 
-    // Buscar el producto en la lista registrada por Nombre o Código
     let prodEncontrado = listaProductos.find(p => 
         p.nombre.toLowerCase() === productoInput.toLowerCase() || 
         (p.codigo && p.codigo.toLowerCase() === productoInput.toLowerCase())
     );
 
-    // Si el producto existe en inventario pero el campo precio está vacío, asignarlo
     if (prodEncontrado && (isNaN(precio) || precio <= 0)) {
         precio = prodEncontrado.precioVenta || prodEncontrado.precio;
         document.getElementById("precio").value = precio;
@@ -171,7 +169,6 @@ function procesarAgregarProducto() {
         return;
     }
 
-    // Si es líquido, abrir modal para seleccionar temperatura
     if (prodEncontrado && prodEncontrado.esLiquido) {
         productoLiquidoPendiente = {
             baseNombre: prodEncontrado.nombre,
@@ -181,7 +178,6 @@ function procesarAgregarProducto() {
         };
         document.getElementById("modalTemperatura").style.display = "flex";
     } else {
-        // Producto normal (Sólido)
         let esIva = prodEncontrado ? prodEncontrado.iva : true;
         let nombre = prodEncontrado ? prodEncontrado.nombre : productoInput;
         ejecutarAgregarAFactura(nombre, cantidad, precio, esIva);
@@ -292,7 +288,13 @@ function mostrarSeccion(id) {
     for (let i = 0; i < secciones.length; i++) secciones[i].style.display = "none";
 
     let sec = document.getElementById(id);
-    if (sec) sec.style.display = "block";
+    if (sec) {
+        sec.style.display = "block";
+        if (id === "compras") {
+            let inputComp = document.getElementById("compraProductoInput");
+            if (inputComp) inputComp.focus();
+        }
+    }
 }
 
 function validarAccesoContabilidad() {
@@ -587,12 +589,15 @@ function agregarProductoLista() {
     alert("¡Producto registrado con éxito!");
 }
 
-// CÁMARA / LECTOR
+// CÁMARA / LECTOR MULTIMODO
 let html5QrcodeScanner = null;
 
 function iniciarEscaneoCamara(modo = 'factura') {
-    let idContenedor = modo === 'factura' ? "contenedorLectorCamaraFactura" : "contenedorLectorCamaraInventario";
-    let idReader = modo === 'factura' ? "readerFactura" : "readerInventario";
+    let idContenedor = modo === 'factura' ? "contenedorLectorCamaraFactura" : 
+                      (modo === 'compras' ? "contenedorLectorCamaraCompras" : "contenedorLectorCamaraInventario");
+    let idReader = modo === 'factura' ? "readerFactura" : 
+                  (modo === 'compras' ? "readerCompras" : "readerInventario");
+
     document.getElementById(idContenedor).style.display = "block";
 
     html5QrcodeScanner = new Html5Qrcode(idReader);
@@ -603,14 +608,18 @@ function iniciarEscaneoCamara(modo = 'factura') {
             detenerEscaneoCamara(modo);
             if (modo === 'factura') {
                 document.getElementById("producto").value = decodedText;
-                
-                // Buscar precio antes de procesar
                 let prod = listaProductos.find(p => p.nombre.toLowerCase() === decodedText.toLowerCase() || (p.codigo && p.codigo.toLowerCase() === decodedText.toLowerCase()));
                 if (prod) {
                     document.getElementById("precio").value = prod.precioVenta || prod.precio;
                 }
-                
                 procesarAgregarProducto();
+            } else if (modo === 'compras') {
+                document.getElementById("compraProductoInput").value = decodedText;
+                let prod = listaProductos.find(p => p.nombre.toLowerCase() === decodedText.toLowerCase() || (p.codigo && p.codigo.toLowerCase() === decodedText.toLowerCase()));
+                if (prod) {
+                    document.getElementById("compraPrecioCosto").value = prod.precioCompra || 0;
+                }
+                agregarItemACompra();
             } else {
                 document.getElementById("nuevoCodigo").value = decodedText;
             }
@@ -620,7 +629,8 @@ function iniciarEscaneoCamara(modo = 'factura') {
 }
 
 function detenerEscaneoCamara(modo = 'factura') {
-    let idContenedor = modo === 'factura' ? "contenedorLectorCamaraFactura" : "contenedorLectorCamaraInventario";
+    let idContenedor = modo === 'factura' ? "contenedorLectorCamaraFactura" : 
+                      (modo === 'compras' ? "contenedorLectorCamaraCompras" : "contenedorLectorCamaraInventario");
     if (html5QrcodeScanner) {
         html5QrcodeScanner.stop().then(() => {
             document.getElementById(idContenedor).style.display = "none";
@@ -629,8 +639,174 @@ function detenerEscaneoCamara(modo = 'factura') {
     }
 }
 
-// INICIALIZACIÓN
+// ==========================================================================
+// MÓDULO DE COMPRAS A PROVEEDORES Y LECTOR DE CÓDIGOS DE BARRAS FÍSICO
+// ==========================================================================
+let itemsCompraActual = [];
+let historialCompras = JSON.parse(localStorage.getItem("compras_sistema")) || [];
+
+function agregarAutocompletadoCompras() {
+    let inputComp = document.getElementById("compraProductoInput");
+    if (!inputComp) return;
+
+    // Detectar entrada de texto y autocompletar precio de costo
+    inputComp.addEventListener("input", function() {
+        let txt = this.value.trim().toLowerCase();
+        let prod = listaProductos.find(p => p.nombre.toLowerCase() === txt || (p.codigo && p.codigo.toLowerCase() === txt));
+        if (prod) {
+            document.getElementById("compraPrecioCosto").value = prod.precioCompra || 0;
+        }
+    });
+
+    // Detectar Enter para escáneres de código de barras físicos
+    inputComp.addEventListener("keydown", function(e) {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            
+            let txt = this.value.trim().toLowerCase();
+            let prod = listaProductos.find(p => p.nombre.toLowerCase() === txt || (p.codigo && p.codigo.toLowerCase() === txt));
+            if (prod && (!document.getElementById("compraPrecioCosto").value || document.getElementById("compraPrecioCosto").value == 0)) {
+                document.getElementById("compraPrecioCosto").value = prod.precioCompra || 0;
+            }
+
+            agregarItemACompra();
+        }
+    });
+}
+
+function agregarItemACompra() {
+    let txtProd = document.getElementById("compraProductoInput").value.trim();
+    let cant = parseInt(document.getElementById("compraCantidad").value) || 0;
+    let costo = parseFloat(document.getElementById("compraPrecioCosto").value) || 0;
+
+    let prodEncontrado = listaProductos.find(p => 
+        p.nombre.toLowerCase() === txtProd.toLowerCase() || 
+        (p.codigo && p.codigo.toLowerCase() === txtProd.toLowerCase())
+    );
+
+    if (!prodEncontrado) {
+        alert("El producto no existe en el Inventario. Regístralo primero en la sección 'Productos'.");
+        return;
+    }
+
+    if (costo <= 0) {
+        costo = prodEncontrado.precioCompra || 0;
+    }
+
+    if (cant <= 0 || costo <= 0) {
+        alert("Ingrese una cantidad y un precio de costo válidos.");
+        return;
+    }
+
+    let subtotal = cant * costo;
+
+    itemsCompraActual.push({
+        codigo: prodEncontrado.codigo,
+        nombre: prodEncontrado.nombre,
+        cantidad: cant,
+        costoUnitario: costo,
+        subtotal: subtotal
+    });
+
+    pintarTablaItemsCompra();
+    
+    document.getElementById("compraProductoInput").value = "";
+    document.getElementById("compraCantidad").value = 1;
+    document.getElementById("compraPrecioCosto").value = "";
+    document.getElementById("compraProductoInput").focus();
+}
+
+function pintarTablaItemsCompra() {
+    let html = "";
+    let totalGeneral = 0;
+
+    for (let i = 0; i < itemsCompraActual.length; i++) {
+        totalGeneral += itemsCompraActual[i].subtotal;
+        html += `
+        <tr>
+            <td>${itemsCompraActual[i].nombre}</td>
+            <td>${itemsCompraActual[i].cantidad} u.</td>
+            <td>$${itemsCompraActual[i].costoUnitario.toFixed(2)}</td>
+            <td>$${itemsCompraActual[i].subtotal.toFixed(2)}</td>
+            <td><button onclick="eliminarItemCompra(${i})" style="background: #cf222e; color: white;">X</button></td>
+        </tr>`;
+    }
+
+    document.getElementById("tablaItemsCompra").innerHTML = html === "" ? "<tr><td colspan='5'>No hay ítems en la factura de compra.</td></tr>" : html;
+    document.getElementById("totalCompraFactura").innerHTML = "$ " + totalGeneral.toFixed(2);
+}
+
+function eliminarItemCompra(index) {
+    itemsCompraActual.splice(index, 1);
+    pintarTablaItemsCompra();
+}
+
+function guardarFacturaCompra() {
+    let proveedor = document.getElementById("compraProveedor").value.trim() || "Proveedor Varios";
+    let numFactura = document.getElementById("compraNumFactura").value.trim() || "S/N";
+
+    if (itemsCompraActual.length === 0) {
+        alert("Debe agregar al menos un producto a la compra.");
+        return;
+    }
+
+    let totalCompra = 0;
+    let detalleTexto = [];
+
+    for (let i = 0; i < itemsCompraActual.length; i++) {
+        let item = itemsCompraActual[i];
+        totalCompra += item.subtotal;
+        detalleTexto.push(`${item.nombre} (+${item.cantidad}u)`);
+
+        let prodIndex = listaProductos.findIndex(p => p.nombre.toLowerCase() === item.nombre.toLowerCase());
+        if (prodIndex !== -1) {
+            listaProductos[prodIndex].cantidad = (parseInt(listaProductos[prodIndex].cantidad) || 0) + item.cantidad;
+            listaProductos[prodIndex].precioCompra = item.costoUnitario;
+        }
+    }
+
+    localStorage.setItem("productos_sistema", JSON.stringify(listaProductos));
+    pintarProductos(listaProductos);
+
+    historialCompras.push({
+        proveedor: proveedor,
+        numFactura: numFactura,
+        detalle: detalleTexto.join(", "),
+        total: totalCompra
+    });
+
+    localStorage.setItem("compras_sistema", JSON.stringify(historialCompras));
+    pintarHistorialCompras();
+
+    alert("¡Compra procesada con éxito! Se ha incrementado el stock de los productos.");
+
+    itemsCompraActual = [];
+    pintarTablaItemsCompra();
+    document.getElementById("compraProveedor").value = "";
+    document.getElementById("compraNumFactura").value = "";
+}
+
+function pintarHistorialCompras() {
+    let html = "";
+    for (let i = 0; i < historialCompras.length; i++) {
+        html += `
+        <tr>
+            <td><strong>${historialCompras[i].proveedor}</strong></td>
+            <td>${historialCompras[i].numFactura}</td>
+            <td>${historialCompras[i].detalle}</td>
+            <td style="color: #2ea44f; font-weight: bold;">$${historialCompras[i].total.toFixed(2)}</td>
+        </tr>`;
+    }
+    let tabla = document.getElementById("tablaHistorialCompras");
+    if (tabla) {
+        tabla.innerHTML = html === "" ? "<tr><td colspan='4'>No hay compras a proveedores registradas.</td></tr>" : html;
+    }
+}
+
+// INICIALIZACIÓN GENERAL
 pintarClientes();
 pintarProductos(listaProductos);
 asignarAutocompletadoFactura();
+agregarAutocompletadoCompras();
 pintarHistorialContable();
+pintarHistorialCompras();
