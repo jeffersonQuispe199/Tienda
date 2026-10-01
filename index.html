@@ -7,6 +7,14 @@
     <title>Mini Facturador - Víveres DARIO</title>
     <link rel="stylesheet" href="apariencia.css">
     <script src="https://unpkg.com/html5-qrcode"></script>
+    <style>
+        #areaImpresionGlobal { display: none; }
+        @media print {
+            body * { visibility: hidden; }
+            #areaImpresionGlobal, #areaImpresionGlobal * { visibility: visible; display: block !important; }
+            #areaImpresionGlobal { position: absolute; left: 0; top: 0; width: 100%; }
+        }
+    </style>
 </head>
 
 <body>
@@ -21,7 +29,6 @@
             <img src="logo.jpg" alt="Logo CoreFact" class="logo-img">
         </div>
         <button onclick="mostrarSeccion('facturacion')">Facturación</button>
-       
         <button onclick="mostrarSeccion('clientes')">Clientes</button>
         <button onclick="mostrarSeccion('productos')">Productos</button> 
         <button onclick="mostrarSeccion('compras')"> Compras</button>
@@ -97,6 +104,10 @@
                     <button onclick="buscarCliente()">Buscar Cliente</button>
                 </div>
 
+                <div style="margin-top: 15px;">
+                    <input type="text" id="buscarClienteInput" placeholder="🔍 Buscar cliente en la lista..." oninput="buscarClienteTabla()">
+                </div>
+
                 <div class="tabla-responsive">
                     <table>
                         <thead>
@@ -137,7 +148,6 @@
                     </div>
                 </div>
 
-                <!-- Visor Cámara Factura -->
                 <div id="contenedorLectorCamaraFactura" style="display: none; margin-top: 15px; text-align: center;">
                     <div id="readerFactura" style="width: 100%; max-width: 400px; margin: 0 auto; border: 2px solid #58a6ff; border-radius: 8px; overflow: hidden;"></div>
                     <button onclick="detenerEscaneoCamara('factura')" style="margin-top: 10px; background: #cf222e; color: white;">Cerrar Cámara</button>
@@ -190,10 +200,6 @@
                     <div class="linea">
                         <span>Subtotal:</span>
                         <span id="subtotal">$0.00</span>
-                    </div>
-                    <div class="linea">
-                        <span>IVA %</span>
-                        <input type="number" id="iva" value="15" onkeyup="calcularTotales()" onchange="calcularTotales()" style="width: 80px; text-align: right;">
                     </div>
                     <div class="linea">
                         <span>IVA:</span>
@@ -258,7 +264,6 @@
                     </div>
                 </div>
 
-                <!-- Visor Cámara Compras -->
                 <div id="contenedorLectorCamaraCompras" style="display: none; margin-top: 15px; text-align: center;">
                     <div id="readerCompras" style="width: 100%; max-width: 400px; margin: 0 auto; border: 2px solid #2ea44f; border-radius: 8px; overflow: hidden;"></div>
                     <button onclick="detenerEscaneoCamara('compras')" style="margin-top: 10px; background: #cf222e; color: white;">Cerrar Cámara</button>
@@ -285,13 +290,17 @@
                 </div>
             </div>
 
-            <!-- HISTORIAL DE COMPRAS REGISTRADAS -->
+            <!-- HISTORIAL DE COMPRAS REGISTRADAS CON BÚSQUEDA -->
             <div class="card">
                 <h2>Historial de Compras de Mercadería</h2>
+                <div style="margin-bottom: 15px;">
+                    <input type="text" id="buscarCompraInput" placeholder="🔍 Buscar compra por proveedor, N° factura o productos..." oninput="buscarComprasTabla()">
+                </div>
                 <div class="tabla-responsive">
                     <table>
                         <thead>
                             <tr>
+                                <th>Fecha / Hora</th>
                                 <th>Proveedor</th>
                                 <th>N° Factura</th>
                                 <th>Detalle / Items</th>
@@ -304,7 +313,7 @@
             </div>
         </div>
 
-        <!-- MODAL SELECCIÓN TEMPERATURA (LÍQUIDOS) -->
+        <!-- MODAL SELECCIÓN TEMPERATURA -->
         <div id="modalTemperatura" class="oculto" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); display: none; justify-content: center; align-items: center; z-index: 2000;">
             <div class="card" style="text-align: center; background: #161b22; border: 1px solid #58a6ff; padding: 25px; border-radius: 10px; width: 320px;">
                 <h3 style="color: #58a6ff; margin-top: 0;">🥤 Producto Líquido</h3>
@@ -370,6 +379,22 @@
                     </div>
                 </div>
 
+                <!-- BÚSQUEDA Y FILTROS POR FECHA -->
+                <div class="grid" style="margin-bottom: 15px;">
+                    <div>
+                        <label>Buscar (Cliente / Cédula / Producto)</label>
+                        <input type="text" id="buscarContabilidad" placeholder="Escribe para buscar..." oninput="filtrarContabilidad()">
+                    </div>
+                    <div>
+                        <label>Desde Fecha</label>
+                        <input type="date" id="filtroFechaInicio" onchange="filtrarContabilidad()">
+                    </div>
+                    <div>
+                        <label>Hasta Fecha</label>
+                        <input type="date" id="filtroFechaFin" onchange="filtrarContabilidad()">
+                    </div>
+                </div>
+
                 <div style="display: flex; justify-content: flex-end; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
                     <button onclick="exportarContabilidadExcel()" style="background: #238636; color: white; padding: 10px 20px;">📊 Imprimir en Excel</button>
                     <button onclick="vaciarHistorialContable()" style="background: #21262d; color: #f85149; padding: 10px 15px;">Borrar Historial</button>
@@ -379,6 +404,7 @@
                     <table>
                         <thead>
                             <tr>
+                                <th>Fecha / Hora</th>
                                 <th>Cliente</th>
                                 <th>Cédula / RUC</th>
                                 <th>Productos Agregados</th>
@@ -402,6 +428,10 @@
                     <button onclick="mostrarTodos()">Todos</button>
                     <button onclick="mostrarConIva()">Con IVA</button>
                     <button onclick="mostrarSinIva()">Sin IVA</button>
+                </div>
+
+                <div style="margin-bottom: 15px;">
+                    <input type="text" id="buscarInventarioInput" placeholder="🔍 Buscar producto por nombre o código..." oninput="buscarProductoInventario()">
                 </div>
 
                 <div class="tabla-responsive">
@@ -467,6 +497,8 @@
         <p>SISTEMA DE TIENDA</p>
         <p>Desarrollador: <span>Jefferson Quispe</span></p>
     </footer>
+
+    <div id="areaImpresionGlobal"></div>
 
     <script src="facturacion.js"></script>
     <script src="quiz.js"></script>

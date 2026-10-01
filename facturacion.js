@@ -1,9 +1,22 @@
+/* ==========================================================================
+   SISTEMA DE FACTURACIÓN Y GESTIÓN DE INVENTARIOS CON FECHAS Y BÚSQUEDA
+   ========================================================================== */
+
 let productos = []; // Productos en la factura actual
 let totalGeneralGlobal = 0; 
 let productoLiquidoPendiente = null; // Variable temporal para el modal de líquidos
 
+// MANTENIDO SIN CAMBIOS (APARTADO A): Credenciales de contabilidad
 const CREDANCIALES_CONTABILIDAD = { usuario: "admin", clave: "1234" };
 let accesoContabilidadConcedido = false;
+
+// HELPER: OBTENER FECHA Y HORA ACTUAL (FORMATO AAAA-MM-DD HH:MM)
+function obtenerFechaActual() {
+    let ahora = new Date();
+    let fecha = ahora.toISOString().split('T')[0];
+    let hora = ahora.toTimeString().split(' ')[0].substring(0, 5);
+    return `${fecha} ${hora}`;
+}
 
 // PRODUCTOS POR DEFECTO CON PROPIEDAD 'esLiquido'
 const productosPorDefecto = [
@@ -20,9 +33,19 @@ function mostrarTodos() { pintarProductos(listaProductos); }
 function mostrarConIva() { pintarProductos(listaProductos.filter(p => p.iva)); }
 function mostrarSinIva() { pintarProductos(listaProductos.filter(p => !p.iva)); }
 
+// BÚSQUEDA EN TIEMPO REAL EN INVENTARIO
+function buscarProductoInventario() {
+    let filtro = document.getElementById("buscarInventarioInput").value.trim().toLowerCase();
+    let filtrados = listaProductos.filter(p => 
+        p.nombre.toLowerCase().includes(filtro) || 
+        (p.codigo && p.codigo.toLowerCase().includes(filtro))
+    );
+    pintarProductos(filtrados);
+}
+
 let indiceEditando = null;
 
-function pintarProductos(lista) {
+function pintarProductos(lista = listaProductos) {
     let contenido = "";
     for (let i = 0; i < lista.length; i++) {
         let pCompra = parseFloat(lista[i].precioCompra) || 0;
@@ -80,11 +103,11 @@ function pintarProductos(lista) {
             </tr>`;
         }
     }
-    document.getElementById("tablaProductosLista").innerHTML = contenido;
+    document.getElementById("tablaProductosLista").innerHTML = contenido === "" ? "<tr><td colspan='11'>No se encontraron productos.</td></tr>" : contenido;
 }
 
-function activarEdicionProducto(i) { indiceEditando = i; pintarProductos(listaProductos); }
-function cancelarEdicionProducto() { indiceEditando = null; pintarProductos(listaProductos); }
+function activarEdicionProducto(i) { indiceEditando = i; pintarProductos(); }
+function cancelarEdicionProducto() { indiceEditando = null; pintarProductos(); }
 
 function guardarEdicionProducto(i) {
     let nuevoCodigo = document.getElementById("editCodigo").value.trim();
@@ -114,18 +137,18 @@ function guardarEdicionProducto(i) {
 
     localStorage.setItem("productos_sistema", JSON.stringify(listaProductos));
     indiceEditando = null;
-    pintarProductos(listaProductos);
+    pintarProductos();
     pintarHistorialContable();
 }
 
 function eliminarProductoLista(nombre) {
     listaProductos = listaProductos.filter(p => p.nombre !== nombre);
     localStorage.setItem("productos_sistema", JSON.stringify(listaProductos));
-    pintarProductos(listaProductos);
+    pintarProductos();
     pintarHistorialContable();
 }
 
-// AUTOCOMPLETADO Y CAPTURA DE TECLA ENTER (PARA LECTORES DE CÓDIGO FÍSICOS) EN FACTURACIÓN
+// AUTOCOMPLETADO Y ENTER EN FACTURACIÓN
 function asignarAutocompletadoFactura() {
     let input = document.getElementById("producto");
     if (!input) return;
@@ -135,8 +158,6 @@ function asignarAutocompletadoFactura() {
         let prod = listaProductos.find(p => p.nombre.toLowerCase() === txt || (p.codigo && p.codigo.toLowerCase() === txt));
         if (prod) {
             document.getElementById("precio").value = prod.precioVenta || prod.precio;
-            let ivaSel = document.getElementById("iva");
-            if (ivaSel) { ivaSel.value = prod.iva ? 15 : 0; calcularTotales(); }
         }
     });
 
@@ -148,7 +169,6 @@ function asignarAutocompletadoFactura() {
     });
 }
 
-// EVALUAR Y AGREGAR PRODUCTO A FACTURA
 function procesarAgregarProducto() {
     let productoInput = document.getElementById("producto").value.trim();
     let cantidad = parseFloat(document.getElementById("cantidad").value);
@@ -165,7 +185,7 @@ function procesarAgregarProducto() {
     }
 
     if (productoInput === "" || isNaN(cantidad) || cantidad <= 0 || isNaN(precio) || precio <= 0) {
-        alert("Complete los datos del producto correctamente o verifique que esté registrado en el Inventario.");
+        alert("Complete los datos del producto correctamente.");
         return;
     }
 
@@ -207,15 +227,20 @@ function cerrarModalTemperatura() {
     productoLiquidoPendiente = null;
 }
 
-function ejecutarAgregarAFactura(nombre, cantidad, precio, tieneIva) {
-    let precioConIva = tieneIva ? precio * 1.15 : precio;
-    let subtotal = cantidad * precioConIva;
+function ejecutarAgregarAFactura(nombre, cantidad, precioUnitario, tieneIva) {
+    let ivaPorcentaje = tieneIva ? 15 : 0;
+    let subtotalSinIva = cantidad * precioUnitario;
+    let montoIva = subtotalSinIva * (ivaPorcentaje / 100);
+    let totalConIva = subtotalSinIva + montoIva;
 
     productos.push({
         producto: nombre,
         cantidad: cantidad,
-        precio: precioConIva,
-        subtotal: subtotal
+        precioUnitario: precioUnitario,
+        subtotalSinIva: subtotalSinIva,
+        ivaPorcentaje: ivaPorcentaje,
+        montoIva: montoIva,
+        subtotal: totalConIva
     });
 
     pintarTabla();
@@ -229,7 +254,7 @@ function pintarTabla() {
         <tr>
             <td>${productos[i].producto}</td>
             <td>${productos[i].cantidad}</td>
-            <td>$ ${productos[i].precio.toFixed(2)}</td>
+            <td>$ ${productos[i].precioUnitario.toFixed(2)}</td>
             <td>$ ${productos[i].subtotal.toFixed(2)}</td>
             <td><button onclick="eliminarProducto(${i})">X</button></td>
         </tr>`;
@@ -244,16 +269,21 @@ function eliminarProducto(i) {
 }
 
 function calcularTotales() {
-    let total = 0;
-    for (let i = 0; i < productos.length; i++) total += productos[i].subtotal;
-    totalGeneralGlobal = total;
+    let sumaSubtotalSinIva = 0;
+    let sumaIva = 0;
+    let sumaTotal = 0;
 
-    let subtotalSinIva = total / 1.15;
-    let valIva = total - subtotalSinIva;
-    
-    document.getElementById("subtotal").innerHTML = "$ " + subtotalSinIva.toFixed(2);
-    document.getElementById("valorIva").innerHTML = "$ " + valIva.toFixed(2);
-    document.getElementById("total").innerHTML = "$ " + total.toFixed(2);
+    for (let i = 0; i < productos.length; i++) {
+        sumaSubtotalSinIva += productos[i].subtotalSinIva;
+        sumaIva += productos[i].montoIva;
+        sumaTotal += productos[i].subtotal;
+    }
+
+    totalGeneralGlobal = sumaTotal;
+
+    document.getElementById("subtotal").innerHTML = "$ " + sumaSubtotalSinIva.toFixed(2);
+    document.getElementById("valorIva").innerHTML = "$ " + sumaIva.toFixed(2);
+    document.getElementById("total").innerHTML = "$ " + sumaTotal.toFixed(2);
 
     calcularVuelto();
 }
@@ -271,7 +301,7 @@ function limpiarInputs() {
     document.getElementById("producto").focus();
 }
 
-// CONTROL DE SECCIONES CON ACCESO RETAIL
+// CONTROL DE SECCIONES CON ACCESO
 function mostrarSeccion(id) {
     if (id === "contabilidad" && !accesoContabilidadConcedido) {
         let modal = document.getElementById("modalLoginContabilidad");
@@ -315,8 +345,18 @@ function cerrarModalLogin() { document.getElementById("modalLoginContabilidad").
 function cerrarSesionContabilidad() { accesoContabilidadConcedido = false; mostrarSeccion("facturacion"); }
 function evaluarTeclaLogin(e) { if (e.key === "Enter") validarAccesoContabilidad(); }
 
-// MANEJO DE CLIENTES
+// MANEJO Y BÚSQUEDA DE CLIENTES
 let clientes = JSON.parse(localStorage.getItem("clientes_sistema")) || [];
+
+function buscarClienteTabla() {
+    let filtro = document.getElementById("buscarClienteInput").value.trim().toLowerCase();
+    let filtrados = clientes.filter(c => 
+        c.nombre.toLowerCase().includes(filtro) || 
+        c.cedula.toLowerCase().includes(filtro) ||
+        c.telefono.toLowerCase().includes(filtro)
+    );
+    pintarClientes(filtrados);
+}
 
 function guardarCliente() {
     let nombre = document.getElementById("nombreCliente").value.trim();
@@ -355,12 +395,12 @@ function modificarCliente() {
     }
 }
 
-function pintarClientes() {
+function pintarClientes(lista = clientes) {
     let html = "";
-    for (let i = 0; i < clientes.length; i++) {
-        html += `<tr><td>${clientes[i].nombre}</td><td>${clientes[i].cedula}</td><td>${clientes[i].telefono}</td><td>${clientes[i].correo}</td><td><button onclick="eliminarCliente(${i})">X</button></td></tr>`;
+    for (let i = 0; i < lista.length; i++) {
+        html += `<tr><td>${lista[i].nombre}</td><td>${lista[i].cedula}</td><td>${lista[i].telefono}</td><td>${lista[i].correo}</td><td><button onclick="eliminarCliente(${i})">X</button></td></tr>`;
     }
-    document.getElementById("tablaClientes").innerHTML = html;
+    document.getElementById("tablaClientes").innerHTML = html === "" ? "<tr><td colspan='5'>No hay clientes registrados.</td></tr>" : html;
 }
 
 function eliminarCliente(i) {
@@ -405,7 +445,7 @@ function alternarTema() {
     }
 })();
 
-// GUARDAR FACTURA Y DESCONTAR INVENTARIO
+// GUARDAR FACTURA CON FECHA AUTOMÁTICA
 let historialContable = JSON.parse(localStorage.getItem("historial_contabilidad")) || [];
 
 function guardarYLimpiarFactura() {
@@ -433,7 +473,7 @@ function guardarYLimpiarFactura() {
     }
 
     localStorage.setItem("productos_sistema", JSON.stringify(listaProductos));
-    pintarProductos(listaProductos);
+    pintarProductos();
 
     let pagoCliente = parseFloat(document.getElementById("montoRecibido").value) || totalFactura;
     if (pagoCliente < totalFactura) {
@@ -445,6 +485,7 @@ function guardarYLimpiarFactura() {
     let listadoTexto = productos.map(p => `${p.producto} (x${p.cantidad})`).join(", ");
 
     historialContable.push({
+        fecha: obtenerFechaActual(), // FECHA
         cliente: inputCliente,
         cedula: inputCedula,
         productos: listadoTexto,
@@ -457,7 +498,7 @@ function guardarYLimpiarFactura() {
     localStorage.setItem("historial_contabilidad", JSON.stringify(historialContable));
     pintarHistorialContable();
 
-    alert(`¡Venta Guardada Exitosamente!\nTotal: $${totalFactura.toFixed(2)}`);
+    alert(`¡Venta Guardada Exitosamente!\nFecha: ${obtenerFechaActual()}\nTotal: $${totalFactura.toFixed(2)}`);
 
     productos = [];
     pintarTabla();
@@ -470,23 +511,47 @@ function guardarYLimpiarFactura() {
     limpiarInputs();
 }
 
-function pintarHistorialContable() {
+// BÚSQUEDA Y FILTRADO POR FECHA EN CONTABILIDAD
+function filtrarContabilidad() {
+    let filtroTexto = document.getElementById("buscarContabilidad").value.trim().toLowerCase();
+    let fechaInicio = document.getElementById("filtroFechaInicio").value;
+    let fechaFin = document.getElementById("filtroFechaFin").value;
+
+    let resultados = historialContable.filter(item => {
+        let coincideTexto = item.cliente.toLowerCase().includes(filtroTexto) ||
+                            item.cedula.toLowerCase().includes(filtroTexto) ||
+                            item.productos.toLowerCase().includes(filtroTexto);
+
+        let fechaItem = item.fecha ? item.fecha.split(' ')[0] : '';
+        let coincideFecha = true;
+
+        if (fechaInicio && fechaItem < fechaInicio) coincideFecha = false;
+        if (fechaFin && fechaItem > fechaFin) coincideFecha = false;
+
+        return coincideTexto && coincideFecha;
+    });
+
+    pintarHistorialContable(resultados);
+}
+
+function pintarHistorialContable(lista = historialContable) {
     let contenido = "";
     let acumuladorVentas = 0;
     let acumuladorCostos = 0;
 
-    for (let i = 0; i < historialContable.length; i++) {
-        acumuladorVentas += historialContable[i].total;
-        acumuladorCostos += (historialContable[i].costoTotal || 0);
+    for (let i = 0; i < lista.length; i++) {
+        acumuladorVentas += lista[i].total;
+        acumuladorCostos += (lista[i].costoTotal || 0);
 
         contenido += `
         <tr>
-            <td>${historialContable[i].cliente}</td>
-            <td>${historialContable[i].cedula}</td>
-            <td>${historialContable[i].productos}</td>
-            <td>$ ${historialContable[i].total.toFixed(2)}</td>
-            <td>$ ${(historialContable[i].pago || 0).toFixed(2)}</td>
-            <td>$ ${(historialContable[i].vuelto || 0).toFixed(2)}</td>
+            <td><small>${lista[i].fecha || 'N/A'}</small></td>
+            <td>${lista[i].cliente}</td>
+            <td>${lista[i].cedula}</td>
+            <td>${lista[i].productos}</td>
+            <td>$ ${lista[i].total.toFixed(2)}</td>
+            <td>$ ${(lista[i].pago || 0).toFixed(2)}</td>
+            <td>$ ${(lista[i].vuelto || 0).toFixed(2)}</td>
         </tr>`;
     }
 
@@ -505,7 +570,7 @@ function pintarHistorialContable() {
 
     let tabla = document.getElementById("tablaHistorialContable");
     if (tabla) {
-        tabla.innerHTML = contenido === "" ? "<tr><td colspan='6'>No hay facturas registradas.</td></tr>" : contenido;
+        tabla.innerHTML = contenido === "" ? "<tr><td colspan='7'>No se encontraron registros.</td></tr>" : contenido;
     }
 }
 
@@ -519,33 +584,58 @@ function vaciarHistorialContable() {
 
 function exportarContabilidadExcel() {
     if (historialContable.length === 0) return;
-    let csv = `<meta charset="utf-8"><table border="1"><tr><th>Cliente</th><th>Cédula</th><th>Productos</th><th>Total</th></tr>`;
+    let csv = `<meta charset="utf-8"><table border="1"><tr><th>Fecha</th><th>Cliente</th><th>Cédula</th><th>Productos</th><th>Total</th></tr>`;
     for (let i = 0; i < historialContable.length; i++) {
-        csv += `<tr><td>${historialContable[i].cliente}</td><td>${historialContable[i].cedula}</td><td>${historialContable[i].productos}</td><td>${historialContable[i].total.toFixed(2)}</td></tr>`;
+        csv += `<tr><td>${historialContable[i].fecha || 'N/A'}</td><td>${historialContable[i].cliente}</td><td>${historialContable[i].cedula}</td><td>${historialContable[i].productos}</td><td>${historialContable[i].total.toFixed(2)}</td></tr>`;
     }
     csv += "</table>";
     let blob = new Blob([csv], { type: "application/vnd.ms-excel" });
     let a = document.createElement("a");
     a.href = URL.createObjectURL(blob);
-    a.download = "Contabilidad.xls";
+    a.download = `Contabilidad_${obtenerFechaActual().split(' ')[0]}.xls`;
     a.click();
 }
 
+// IMPRESIÓN CON FECHA Y COMPATIBILIDAD MÓVIL
 function imprimirFacturaClientePDF() {
-    if (productos.length === 0) return;
+    if (productos.length === 0) {
+        alert("Agregue productos para generar la factura.");
+        return;
+    }
     let txtCliente = document.getElementById("cliente").value.trim() || "Consumidor Final";
     let txtCedula = document.getElementById("cedula").value.trim() || "9999999999";
+    let fechaHora = obtenerFechaActual();
     
-    let html = `<html><head><title>Factura</title></head><body><h2>Factura - ${txtCliente}</h2><p>Cédula: ${txtCedula}</p><table border="1" style="width:100%; border-collapse:collapse;"><tr><th>Producto</th><th>Cant</th><th>Total</th></tr>`;
-    for (let i = 0; i < productos.length; i++) {
-        html += `<tr><td>${productos[i].producto}</td><td>${productos[i].cantidad}</td><td>$${productos[i].subtotal.toFixed(2)}</td></tr>`;
+    let contenedorImpresion = document.getElementById("areaImpresionGlobal");
+    if (!contenedorImpresion) {
+        contenedorImpresion = document.createElement("div");
+        contenedorImpresion.id = "areaImpresionGlobal";
+        document.body.appendChild(contenedorImpresion);
     }
-    html += `</table><h3>Total: ${document.getElementById("total").innerHTML}</h3></body></html>`;
 
-    let win = window.open("", "_blank");
-    win.document.write(html);
-    win.document.close();
-    win.print();
+    let html = `
+        <div style="padding: 20px; font-family: sans-serif; color: #000;">
+            <h2>Factura - Víveres DARIO</h2>
+            <p><strong>Fecha / Hora:</strong> ${fechaHora}</p>
+            <p><strong>Cliente:</strong> ${txtCliente}<br><strong>Cédula/RUC:</strong> ${txtCedula}</p>
+            <table border="1" style="width:100%; border-collapse:collapse; margin-top: 10px;">
+                <thead>
+                    <tr><th>Producto</th><th>Cant</th><th>Subtotal</th></tr>
+                </thead>
+                <tbody>`;
+    
+    for (let i = 0; i < productos.length; i++) {
+        html += `<tr><td>${productos[i].producto}</td><td style="text-align:center;">${productos[i].cantidad}</td><td style="text-align:right;">$${productos[i].subtotal.toFixed(2)}</td></tr>`;
+    }
+    
+    html += `
+                </tbody>
+            </table>
+            <h3 style="text-align:right; margin-top: 15px;">Total: ${document.getElementById("total").innerHTML}</h3>
+        </div>`;
+
+    contenedorImpresion.innerHTML = html;
+    window.print();
 }
 
 // INVENTARIO - AGREGAR PRODUCTO
@@ -584,7 +674,7 @@ function agregarProductoLista() {
     document.getElementById("nuevoPrecioVenta").value = "";
     document.getElementById("nuevaCantidad").value = "";
 
-    pintarProductos(listaProductos);
+    pintarProductos();
     pintarHistorialContable();
     alert("¡Producto registrado con éxito!");
 }
@@ -639,17 +729,24 @@ function detenerEscaneoCamara(modo = 'factura') {
     }
 }
 
-// ==========================================================================
-// MÓDULO DE COMPRAS A PROVEEDORES Y LECTOR DE CÓDIGOS DE BARRAS FÍSICO
-// ==========================================================================
+// MÓDULO DE COMPRAS A PROVEEDORES
 let itemsCompraActual = [];
 let historialCompras = JSON.parse(localStorage.getItem("compras_sistema")) || [];
+
+function buscarComprasTabla() {
+    let filtro = document.getElementById("buscarCompraInput").value.trim().toLowerCase();
+    let filtrados = historialCompras.filter(c => 
+        c.proveedor.toLowerCase().includes(filtro) || 
+        c.numFactura.toLowerCase().includes(filtro) ||
+        c.detalle.toLowerCase().includes(filtro)
+    );
+    pintarHistorialCompras(filtrados);
+}
 
 function agregarAutocompletadoCompras() {
     let inputComp = document.getElementById("compraProductoInput");
     if (!inputComp) return;
 
-    // Detectar entrada de texto y autocompletar precio de costo
     inputComp.addEventListener("input", function() {
         let txt = this.value.trim().toLowerCase();
         let prod = listaProductos.find(p => p.nombre.toLowerCase() === txt || (p.codigo && p.codigo.toLowerCase() === txt));
@@ -658,17 +755,14 @@ function agregarAutocompletadoCompras() {
         }
     });
 
-    // Detectar Enter para escáneres de código de barras físicos
     inputComp.addEventListener("keydown", function(e) {
         if (e.key === "Enter") {
             e.preventDefault();
-            
             let txt = this.value.trim().toLowerCase();
             let prod = listaProductos.find(p => p.nombre.toLowerCase() === txt || (p.codigo && p.codigo.toLowerCase() === txt));
             if (prod && (!document.getElementById("compraPrecioCosto").value || document.getElementById("compraPrecioCosto").value == 0)) {
                 document.getElementById("compraPrecioCosto").value = prod.precioCompra || 0;
             }
-
             agregarItemACompra();
         }
     });
@@ -689,12 +783,10 @@ function agregarItemACompra() {
         return;
     }
 
-    if (costo <= 0) {
-        costo = prodEncontrado.precioCompra || 0;
-    }
+    if (costo <= 0) costo = prodEncontrado.precioCompra || 0;
 
     if (cant <= 0 || costo <= 0) {
-        alert("Ingrese una cantidad y un precio de costo válidos.");
+        alert("Ingrese una cantidad y costo válidos.");
         return;
     }
 
@@ -766,9 +858,10 @@ function guardarFacturaCompra() {
     }
 
     localStorage.setItem("productos_sistema", JSON.stringify(listaProductos));
-    pintarProductos(listaProductos);
+    pintarProductos();
 
     historialCompras.push({
+        fecha: obtenerFechaActual(), // FECHA EN COMPRAS
         proveedor: proveedor,
         numFactura: numFactura,
         detalle: detalleTexto.join(", "),
@@ -778,7 +871,7 @@ function guardarFacturaCompra() {
     localStorage.setItem("compras_sistema", JSON.stringify(historialCompras));
     pintarHistorialCompras();
 
-    alert("¡Compra procesada con éxito! Se ha incrementado el stock de los productos.");
+    alert("¡Compra procesada con éxito! Se ha incrementado el stock.");
 
     itemsCompraActual = [];
     pintarTablaItemsCompra();
@@ -786,26 +879,27 @@ function guardarFacturaCompra() {
     document.getElementById("compraNumFactura").value = "";
 }
 
-function pintarHistorialCompras() {
+function pintarHistorialCompras(lista = historialCompras) {
     let html = "";
-    for (let i = 0; i < historialCompras.length; i++) {
+    for (let i = 0; i < lista.length; i++) {
         html += `
         <tr>
-            <td><strong>${historialCompras[i].proveedor}</strong></td>
-            <td>${historialCompras[i].numFactura}</td>
-            <td>${historialCompras[i].detalle}</td>
-            <td style="color: #2ea44f; font-weight: bold;">$${historialCompras[i].total.toFixed(2)}</td>
+            <td><small>${lista[i].fecha || 'N/A'}</small></td>
+            <td><strong>${lista[i].proveedor}</strong></td>
+            <td>${lista[i].numFactura}</td>
+            <td>${lista[i].detalle}</td>
+            <td style="color: #2ea44f; font-weight: bold;">$${lista[i].total.toFixed(2)}</td>
         </tr>`;
     }
     let tabla = document.getElementById("tablaHistorialCompras");
     if (tabla) {
-        tabla.innerHTML = html === "" ? "<tr><td colspan='4'>No hay compras a proveedores registradas.</td></tr>" : html;
+        tabla.innerHTML = html === "" ? "<tr><td colspan='5'>No hay compras registradas.</td></tr>" : html;
     }
 }
 
 // INICIALIZACIÓN GENERAL
 pintarClientes();
-pintarProductos(listaProductos);
+pintarProductos();
 asignarAutocompletadoFactura();
 agregarAutocompletadoCompras();
 pintarHistorialContable();
