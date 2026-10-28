@@ -18,28 +18,43 @@ function obtenerFechaActual() {
     return `${fecha} ${hora}`;
 }
 
-// PRODUCTOS POR DEFECTO CON PROPIEDAD 'esLiquido'
+// PRODUCTOS POR DEFECTO CON PROPIEDAD 'esLiquido' Y 'fecha'
 const productosPorDefecto = [
-  { codigo: "P001", nombre: "Arroz", precioCompra: 2.00, precioVenta: 2.50, cantidad: 50, stockMaximo: 100, iva: true, esLiquido: false },
-  { codigo: "P002", nombre: "Leche 1L", precioCompra: 0.90, precioVenta: 1.20, cantidad: 30, stockMaximo: 100, iva: true, esLiquido: true },
-  { codigo: "P003", nombre: "Pan", precioCompra: 0.35, precioVenta: 0.50, cantidad: 80, stockMaximo: 100, iva: false, esLiquido: false },
-  { codigo: "P004", nombre: "Coca Cola 1.5L", precioCompra: 1.10, precioVenta: 1.50, cantidad: 25, stockMaximo: 50, iva: true, esLiquido: true },
-  { codigo: "P005", nombre: "Agua Mineral 500ml", precioCompra: 0.25, precioVenta: 0.50, cantidad: 60, stockMaximo: 100, iva: false, esLiquido: true }
+  { codigo: "P001", nombre: "Arroz", precioCompra: 2.00, precioVenta: 2.50, cantidad: 50, stockMaximo: 100, iva: true, esLiquido: false, fecha: "2026-01-01 08:00" },
+  { codigo: "P002", nombre: "Leche 1L", precioCompra: 0.90, precioVenta: 1.20, cantidad: 30, stockMaximo: 100, iva: true, esLiquido: true, fecha: "2026-01-02 08:00" },
+  { codigo: "P003", nombre: "Pan", precioCompra: 0.35, precioVenta: 0.50, cantidad: 80, stockMaximo: 100, iva: false, esLiquido: false, fecha: "2026-01-03 08:00" },
+  { codigo: "P004", nombre: "Coca Cola 1.5L", precioCompra: 1.10, precioVenta: 1.50, cantidad: 25, stockMaximo: 50, iva: true, esLiquido: true, fecha: "2026-01-04 08:00" },
+  { codigo: "P005", nombre: "Agua Mineral 500ml", precioCompra: 0.25, precioVenta: 0.50, cantidad: 60, stockMaximo: 100, iva: false, esLiquido: true, fecha: "2026-01-05 08:00" }
 ];
 
 let listaProductos = JSON.parse(localStorage.getItem("productos_sistema")) || productosPorDefecto;
 
-function mostrarTodos() { pintarProductos(listaProductos); }
+function mostrarTodos() { 
+    document.getElementById("buscarInventarioInput").value = "";
+    document.getElementById("filtroFechaProductoInicio").value = "";
+    document.getElementById("filtroFechaProductoFin").value = "";
+    pintarProductos(listaProductos); 
+}
 function mostrarConIva() { pintarProductos(listaProductos.filter(p => p.iva)); }
 function mostrarSinIva() { pintarProductos(listaProductos.filter(p => !p.iva)); }
 
-// BÚSQUEDA EN TIEMPO REAL EN INVENTARIO
-function buscarProductoInventario() {
+// BÚSQUEDA Y FILTRADO POR FECHA EN INVENTARIO DE PRODUCTOS
+function filtrarProductosPorFecha() {
     let filtro = document.getElementById("buscarInventarioInput").value.trim().toLowerCase();
-    let filtrados = listaProductos.filter(p => 
-        p.nombre.toLowerCase().includes(filtro) || 
-        (p.codigo && p.codigo.toLowerCase().includes(filtro))
-    );
+    let fechaInicio = document.getElementById("filtroFechaProductoInicio").value;
+    let fechaFin = document.getElementById("filtroFechaProductoFin").value;
+
+    let filtrados = listaProductos.filter(p => {
+        let coincideTexto = p.nombre.toLowerCase().includes(filtro) || 
+                            (p.codigo && p.codigo.toLowerCase().includes(filtro));
+
+        let fechaItem = p.fecha ? p.fecha.split(' ')[0] : '';
+        let coincideFecha = true;
+        if (fechaInicio && fechaItem < fechaInicio) coincideFecha = false;
+        if (fechaFin && fechaItem > fechaFin) coincideFecha = false;
+
+        return coincideTexto && coincideFecha;
+    });
     pintarProductos(filtrados);
 }
 
@@ -58,6 +73,7 @@ function pintarProductos(lista = listaProductos) {
         if (indiceEditando === i) {
             contenido += `
             <tr>
+                <td><small>${lista[i].fecha || 'N/A'}</small></td>
                 <td><input type="text" id="editCodigo" value="${lista[i].codigo || ''}" style="width: 70px;"></td>
                 <td><input type="text" id="editNombre" value="${lista[i].nombre}" style="width: 90%;"></td>
                 <td><input type="number" id="editPrecioCompra" step="0.01" value="${pCompra}" style="width: 60px;"></td>
@@ -86,6 +102,7 @@ function pintarProductos(lista = listaProductos) {
         } else {
             contenido += `
             <tr>
+                <td><small>${lista[i].fecha || 'N/A'}</small></td>
                 <td><strong>${lista[i].codigo || 'S/C'}</strong></td>
                 <td>${lista[i].nombre}</td>
                 <td>$${pCompra.toFixed(2)}</td>
@@ -103,7 +120,7 @@ function pintarProductos(lista = listaProductos) {
             </tr>`;
         }
     }
-    document.getElementById("tablaProductosLista").innerHTML = contenido === "" ? "<tr><td colspan='11'>No se encontraron productos.</td></tr>" : contenido;
+    document.getElementById("tablaProductosLista").innerHTML = contenido === "" ? "<tr><td colspan='12'>No se encontraron productos.</td></tr>" : contenido;
 }
 
 function activarEdicionProducto(i) { indiceEditando = i; pintarProductos(); }
@@ -345,16 +362,26 @@ function cerrarModalLogin() { document.getElementById("modalLoginContabilidad").
 function cerrarSesionContabilidad() { accesoContabilidadConcedido = false; mostrarSeccion("facturacion"); }
 function evaluarTeclaLogin(e) { if (e.key === "Enter") validarAccesoContabilidad(); }
 
-// MANEJO Y BÚSQUEDA DE CLIENTES
+// MANEJO, BÚSQUEDA Y FILTRADO POR FECHA DE CLIENTES
 let clientes = JSON.parse(localStorage.getItem("clientes_sistema")) || [];
 
 function buscarClienteTabla() {
     let filtro = document.getElementById("buscarClienteInput").value.trim().toLowerCase();
-    let filtrados = clientes.filter(c => 
-        c.nombre.toLowerCase().includes(filtro) || 
-        c.cedula.toLowerCase().includes(filtro) ||
-        c.telefono.toLowerCase().includes(filtro)
-    );
+    let fechaInicio = document.getElementById("filtroFechaClienteInicio").value;
+    let fechaFin = document.getElementById("filtroFechaClienteFin").value;
+
+    let filtrados = clientes.filter(c => {
+        let coincideTexto = c.nombre.toLowerCase().includes(filtro) || 
+                            c.cedula.toLowerCase().includes(filtro) ||
+                            c.telefono.toLowerCase().includes(filtro);
+
+        let fechaItem = c.fecha ? c.fecha.split(' ')[0] : '';
+        let coincideFecha = true;
+        if (fechaInicio && fechaItem < fechaInicio) coincideFecha = false;
+        if (fechaFin && fechaItem > fechaFin) coincideFecha = false;
+
+        return coincideTexto && coincideFecha;
+    });
     pintarClientes(filtrados);
 }
 
@@ -366,7 +393,13 @@ function guardarCliente() {
 
     if (nombre === "" || cedula === "") { alert("Ingrese datos obligatorios."); return; }
 
-    clientes.push({ nombre, cedula, telefono, correo });
+    clientes.push({ 
+        nombre, 
+        cedula, 
+        telefono, 
+        correo, 
+        fecha: obtenerFechaActual() // FECHA DE REGISTRO
+    });
     localStorage.setItem("clientes_sistema", JSON.stringify(clientes));
     pintarClientes();
     limpiarClientes();
@@ -398,9 +431,16 @@ function modificarCliente() {
 function pintarClientes(lista = clientes) {
     let html = "";
     for (let i = 0; i < lista.length; i++) {
-        html += `<tr><td>${lista[i].nombre}</td><td>${lista[i].cedula}</td><td>${lista[i].telefono}</td><td>${lista[i].correo}</td><td><button onclick="eliminarCliente(${i})">X</button></td></tr>`;
+        html += `<tr>
+            <td><small>${lista[i].fecha || 'N/A'}</small></td>
+            <td>${lista[i].nombre}</td>
+            <td>${lista[i].cedula}</td>
+            <td>${lista[i].telefono}</td>
+            <td>${lista[i].correo}</td>
+            <td><button onclick="eliminarCliente(${i})">X</button></td>
+        </tr>`;
     }
-    document.getElementById("tablaClientes").innerHTML = html === "" ? "<tr><td colspan='5'>No hay clientes registrados.</td></tr>" : html;
+    document.getElementById("tablaClientes").innerHTML = html === "" ? "<tr><td colspan='6'>No hay clientes registrados.</td></tr>" : html;
 }
 
 function eliminarCliente(i) {
@@ -663,7 +703,8 @@ function agregarProductoLista() {
         cantidad: inputCantidad,
         stockMaximo: inputStockMaximo,
         esLiquido: inputEsLiquido,
-        iva: inputIva
+        iva: inputIva,
+        fecha: obtenerFechaActual() // FECHA DE CREACIÓN DEL PRODUCTO
     });
 
     localStorage.setItem("productos_sistema", JSON.stringify(listaProductos));
@@ -733,13 +774,24 @@ function detenerEscaneoCamara(modo = 'factura') {
 let itemsCompraActual = [];
 let historialCompras = JSON.parse(localStorage.getItem("compras_sistema")) || [];
 
-function buscarComprasTabla() {
-    let filtro = document.getElementById("buscarCompraInput").value.trim().toLowerCase();
-    let filtrados = historialCompras.filter(c => 
-        c.proveedor.toLowerCase().includes(filtro) || 
-        c.numFactura.toLowerCase().includes(filtro) ||
-        c.detalle.toLowerCase().includes(filtro)
-    );
+function filtrarComprasPorFecha() {
+    let filtroTexto = document.getElementById("buscarCompraInput").value.trim().toLowerCase();
+    let fechaInicio = document.getElementById("filtroFechaCompraInicio").value;
+    let fechaFin = document.getElementById("filtroFechaCompraFin").value;
+
+    let filtrados = historialCompras.filter(c => {
+        let coincideTexto = c.proveedor.toLowerCase().includes(filtroTexto) || 
+                            c.numFactura.toLowerCase().includes(filtroTexto) ||
+                            c.detalle.toLowerCase().includes(filtroTexto);
+
+        let fechaItem = c.fecha ? c.fecha.split(' ')[0] : '';
+        let coincideFecha = true;
+
+        if (fechaInicio && fechaItem < fechaInicio) coincideFecha = false;
+        if (fechaFin && fechaItem > fechaFin) coincideFecha = false;
+
+        return coincideTexto && coincideFecha;
+    });
     pintarHistorialCompras(filtrados);
 }
 
@@ -861,7 +913,7 @@ function guardarFacturaCompra() {
     pintarProductos();
 
     historialCompras.push({
-        fecha: obtenerFechaActual(), // FECHA EN COMPRAS
+        fecha: obtenerFechaActual(), // FECHA DE LA COMPRA
         proveedor: proveedor,
         numFactura: numFactura,
         detalle: detalleTexto.join(", "),

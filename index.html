@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -104,14 +103,29 @@
                     <button onclick="buscarCliente()">Buscar Cliente</button>
                 </div>
 
-                <div style="margin-top: 15px;">
-                    <input type="text" id="buscarClienteInput" placeholder="🔍 Buscar cliente en la lista..." oninput="buscarClienteTabla()">
+                <hr style="border-color: #30363d; margin: 20px 0;">
+
+                <!-- FILTROS DE BÚSQUEDA DE CLIENTES POR TEXTO Y FECHAS -->
+                <div class="grid" style="margin-bottom: 15px;">
+                    <div>
+                        <label>Buscar (Nombre / Cédula / Teléfono)</label>
+                        <input type="text" id="buscarClienteInput" placeholder="🔍 Buscar cliente..." oninput="buscarClienteTabla()">
+                    </div>
+                    <div>
+                        <label>Desde Fecha</label>
+                        <input type="date" id="filtroFechaClienteInicio" onchange="buscarClienteTabla()">
+                    </div>
+                    <div>
+                        <label>Hasta Fecha</label>
+                        <input type="date" id="filtroFechaClienteFin" onchange="buscarClienteTabla()">
+                    </div>
                 </div>
 
                 <div class="tabla-responsive">
                     <table>
                         <thead>
                             <tr>
+                                <th>Fecha Registro</th>
                                 <th>Nombre</th>
                                 <th>Cédula</th>
                                 <th>Teléfono</th>
@@ -290,11 +304,22 @@
                 </div>
             </div>
 
-            <!-- HISTORIAL DE COMPRAS REGISTRADAS CON BÚSQUEDA -->
+            <!-- HISTORIAL DE COMPRAS REGISTRADAS CON BÚSQUEDA Y FILTROS POR FECHA -->
             <div class="card">
                 <h2>Historial de Compras de Mercadería</h2>
-                <div style="margin-bottom: 15px;">
-                    <input type="text" id="buscarCompraInput" placeholder="🔍 Buscar compra por proveedor, N° factura o productos..." oninput="buscarComprasTabla()">
+                <div class="grid" style="margin-bottom: 15px;">
+                    <div>
+                        <label>Buscar (Proveedor / N° Factura / Detalle)</label>
+                        <input type="text" id="buscarCompraInput" placeholder="🔍 Buscar compra..." oninput="filtrarComprasPorFecha()">
+                    </div>
+                    <div>
+                        <label>Desde Fecha</label>
+                        <input type="date" id="filtroFechaCompraInicio" onchange="filtrarComprasPorFecha()">
+                    </div>
+                    <div>
+                        <label>Hasta Fecha</label>
+                        <input type="date" id="filtroFechaCompraFin" onchange="filtrarComprasPorFecha()">
+                    </div>
                 </div>
                 <div class="tabla-responsive">
                     <table>
@@ -430,14 +455,27 @@
                     <button onclick="mostrarSinIva()">Sin IVA</button>
                 </div>
 
-                <div style="margin-bottom: 15px;">
-                    <input type="text" id="buscarInventarioInput" placeholder="🔍 Buscar producto por nombre o código..." oninput="buscarProductoInventario()">
+                <!-- BÚSQUEDA Y FILTROS POR FECHA DE CREACIÓN DE PRODUCTOS -->
+                <div class="grid" style="margin-bottom: 15px;">
+                    <div>
+                        <label>Buscar (Nombre o Código)</label>
+                        <input type="text" id="buscarInventarioInput" placeholder="🔍 Buscar producto..." oninput="filtrarProductosPorFecha()">
+                    </div>
+                    <div>
+                        <label>Desde Fecha</label>
+                        <input type="date" id="filtroFechaProductoInicio" onchange="filtrarProductosPorFecha()">
+                    </div>
+                    <div>
+                        <label>Hasta Fecha</label>
+                        <input type="date" id="filtroFechaProductoFin" onchange="filtrarProductosPorFecha()">
+                    </div>
                 </div>
 
                 <div class="tabla-responsive">
                     <table>
                         <thead>
                             <tr>
+                                <th>Fecha Registro</th>
                                 <th>Código</th>
                                 <th>Producto</th>
                                 <th>P. Compra</th>
