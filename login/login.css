@@ -1,0 +1,409 @@
+/* ==========================================================================
+   RESET GENERAL Y VARIABLES (TEMA CYBER/NEON 2026)
+   ========================================================================== */
+:root {
+    --bg-dark: #07090e;
+    --neon-cyan: #00f0ff;
+    --neon-blue: #0066ff;
+    --neon-purple: #7000ff;
+    --neon-pink: #ff007f;
+    --text-primary: #ffffff;
+    --text-secondary: #8b9bb4;
+    --glass-bg: rgba(13, 17, 28, 0.75);
+    --glass-border: rgba(255, 255, 255, 0.12);
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+}
+
+body {
+    background-color: var(--bg-dark);
+    color: var(--text-primary);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+    /* Permite scroll vertical fluido en pantallas pequeñas o cuando sale el teclado virtual */
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 20px;
+}
+
+/* ==========================================================================
+   FONDO ANIMADO CANVAS
+   ========================================================================== */
+#canvasParticulas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+    pointer-events: none;
+}
+
+/* ==========================================================================
+   TARJETA GLASSMORPHISM RESPONSIVA
+   ========================================================================== */
+.login-wrapper {
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 440px;
+    margin: auto;
+}
+
+.tarjeta-login {
+    background: var(--glass-bg);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid var(--glass-border);
+    border-radius: 24px;
+    padding: 35px 30px;
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6),
+                0 0 30px rgba(0, 240, 255, 0.05);
+    width: 100%;
+}
+
+/* ==========================================================================
+   ENCABEZADO Y ANIMACIÓN LED 3D
+   ========================================================================== */
+.login-header {
+    text-align: center;
+    margin-bottom: 25px;
+}
+
+.logo-led-glow {
+    width: 55px;
+    height: 55px;
+    margin: 0 auto 12px;
+    background: radial-gradient(circle, rgba(0,240,255,0.2) 0%, rgba(0,0,0,0) 70%);
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 1.6rem;
+    color: var(--neon-cyan);
+    box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+}
+
+.led-3d-texto {
+    font-size: clamp(1.5rem, 4vw, 2rem); /* Escala fluida según la pantalla */
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #ffffff;
+    display: inline-block;
+    animation: resplandorLed3D 4s infinite ease-in-out;
+}
+
+@keyframes resplandorLed3D {
+    0%, 100% {
+        transform: perspective(500px) rotateX(10deg) rotateY(-5deg);
+        text-shadow: 
+            1px 1px 0px var(--neon-blue),
+            2px 2px 0px var(--neon-blue),
+            3px 3px 6px rgba(0, 0, 0, 0.9),
+            0 0 15px rgba(0, 240, 255, 0.6);
+    }
+    50% {
+        transform: perspective(500px) rotateX(10deg) rotateY(5deg);
+        text-shadow: 
+            1px 1px 0px var(--neon-pink),
+            2px 2px 0px var(--neon-pink),
+            3px 3px 6px rgba(0, 0, 0, 0.9),
+            0 0 25px rgba(255, 0, 127, 0.8);
+    }
+}
+
+.subtitulo {
+    color: var(--text-secondary);
+    font-size: 0.85rem;
+    margin-top: 5px;
+}
+
+/* ==========================================================================
+   INPUTS Y CAMPOS DE TEXTO
+   ========================================================================== */
+.grupo-input {
+    margin-bottom: 18px;
+}
+
+.grupo-input label {
+    display: block;
+    font-size: 0.8rem;
+    color: var(--text-secondary);
+    margin-bottom: 6px;
+    font-weight: 600;
+}
+
+.caja-input {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.icono-input {
+    position: absolute;
+    left: 15px;
+    color: var(--text-secondary);
+    font-size: 1rem;
+    pointer-events: none;
+    transition: color 0.3s;
+}
+
+.icono-password-toggle {
+    position: absolute;
+    right: 15px;
+    color: var(--text-secondary);
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: color 0.3s;
+    padding: 5px;
+}
+
+.icono-password-toggle:hover {
+    color: var(--neon-cyan);
+}
+
+.caja-input input {
+    width: 100%;
+    padding: 12px 45px 12px 45px;
+    background: rgba(7, 9, 14, 0.6);
+    border: 1px solid var(--glass-border);
+    border-radius: 12px;
+    color: var(--text-primary);
+    font-size: 0.95rem;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+.caja-input input:focus {
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 15px rgba(0, 240, 255, 0.25);
+    background: rgba(7, 9, 14, 0.85);
+}
+
+.caja-input input:focus ~ .icono-input {
+    color: var(--neon-cyan);
+}
+
+/* ==========================================================================
+   CHECKBOX Y LINKS (Diseño Adaptable Flex)
+   ========================================================================== */
+.opciones-login {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 22px;
+    font-size: 0.8rem;
+    gap: 10px;
+    flex-wrap: wrap; /* Se acomoda en pantallas muy pequeñas */
+}
+
+.check-container {
+    display: flex;
+    align-items: center;
+    position: relative;
+    padding-left: 24px;
+    cursor: pointer;
+    color: var(--text-secondary);
+    user-select: none;
+}
+
+.check-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.custom-checkmark {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    left: 0;
+    height: 15px;
+    width: 15px;
+    background: rgba(7, 9, 14, 0.8);
+    border: 1px solid var(--glass-border);
+    border-radius: 4px;
+}
+
+.check-container input:checked ~ .custom-checkmark {
+    background: var(--neon-cyan);
+    border-color: var(--neon-cyan);
+    box-shadow: 0 0 8px var(--neon-cyan);
+}
+
+.link-olvido {
+    color: var(--neon-cyan);
+    text-decoration: none;
+    transition: opacity 0.3s;
+    white-space: nowrap;
+}
+
+.link-olvido:hover {
+    opacity: 0.8;
+    text-decoration: underline;
+}
+
+/* ==========================================================================
+   BOTÓN LED 3D CON MOVIMIENTO
+   ========================================================================== */
+.btn-led-3d {
+    position: relative;
+    width: 100%;
+    padding: 14px;
+    border: none;
+    border-radius: 12px;
+    background: #0d111c;
+    color: #ffffff;
+    font-weight: 800;
+    font-size: 0.95rem;
+    letter-spacing: 1px;
+    cursor: pointer;
+    overflow: hidden;
+    z-index: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Animación de Borde LED Neón Giratorio */
+.led-border-glow {
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(
+        from 0deg,
+        transparent 0%,
+        var(--neon-cyan) 25%,
+        transparent 50%,
+        var(--neon-purple) 75%,
+        transparent 100%
+    );
+    animation: rotacionLed 4s linear infinite;
+    z-index: -2;
+}
+
+@keyframes rotacionLed {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.btn-led-3d::after {
+    content: '';
+    position: absolute;
+    inset: 2px;
+    background: #0d111c;
+    border-radius: 10px;
+    z-index: -1;
+    transition: background 0.3s;
+}
+
+.btn-contenido {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 2;
+}
+
+.btn-led-3d:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 0 25px rgba(0, 240, 255, 0.4);
+}
+
+.btn-led-3d:hover::after {
+    background: rgba(13, 17, 28, 0.85);
+}
+
+.btn-led-3d:active {
+    transform: translateY(1px);
+}
+
+/* ==========================================================================
+   SPINNER Y MENSAJES DE FEEDBACK
+   ========================================================================== */
+.spinner {
+    width: 18px;
+    height: 18px;
+    border: 3px solid rgba(255, 255, 255, 0.3);
+    border-top: 3px solid var(--neon-cyan);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+.mensaje-alerta {
+    margin-top: 15px;
+    padding: 10px;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    text-align: center;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.mensaje-alerta.error {
+    background: rgba(255, 0, 85, 0.15);
+    border: 1px solid #ff0055;
+    color: #ff4d88;
+}
+
+.mensaje-alerta.exito {
+    background: rgba(0, 255, 136, 0.15);
+    border: 1px solid #00ff88;
+    color: #00ff88;
+}
+
+.oculto { display: none !important; }
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(-5px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* Animación Shake para error de credenciales */
+.shake {
+    animation: efectoShake 0.4s ease-in-out;
+}
+
+@keyframes efectoShake {
+    0%, 100% { transform: translateX(0); }
+    20%, 60% { transform: translateX(-8px); }
+    40%, 80% { transform: translateX(8px); }
+}
+
+/* ==========================================================================
+   MEDIA QUERIES ADICIONALES PARA MÓVILES PEQUEÑOS (< 480px)
+   ========================================================================== */
+@media (max-width: 480px) {
+    body {
+        padding: 12px;
+        align-items: flex-start; /* Evita recortes si la pantalla es reducida verticalmente */
+    }
+
+    .tarjeta-login {
+        padding: 25px 20px;
+        border-radius: 18px;
+    }
+
+    .opciones-login {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+}

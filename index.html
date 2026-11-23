@@ -101,6 +101,8 @@
                     <button onclick="guardarCliente()">Guardar Cliente</button>
                     <button onclick="modificarCliente()">Modificar Cliente</button>
                     <button onclick="buscarCliente()">Buscar Cliente</button>
+                    <!-- BOTÓN EXPORTAR CLIENTES A EXCEL -->
+                    <button onclick="exportarClientesExcel()" style="background: #238636; color: white;">📊 Imprimir Clientes en Excel</button>
                 </div>
 
                 <hr style="border-color: #30363d; margin: 20px 0;">
@@ -306,7 +308,12 @@
 
             <!-- HISTORIAL DE COMPRAS REGISTRADAS CON BÚSQUEDA Y FILTROS POR FECHA -->
             <div class="card">
-                <h2>Historial de Compras de Mercadería</h2>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <h2 style="margin: 0;">Historial de Compras de Mercadería</h2>
+                    <!-- BOTÓN EXPORTAR COMPRAS A EXCEL -->
+                    <button onclick="exportarComprasExcel()" style="background: #238636; color: white; padding: 10px 20px;">📊 Imprimir Compras en Excel</button>
+                </div>
+
                 <div class="grid" style="margin-bottom: 15px;">
                     <div>
                         <label>Buscar (Proveedor / N° Factura / Detalle)</label>
@@ -449,10 +456,14 @@
             <div class="card">
                 <h2>Inventario de Productos del Sistema</h2>
 
-                <div style="display: flex; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
-                    <button onclick="mostrarTodos()">Todos</button>
-                    <button onclick="mostrarConIva()">Con IVA</button>
-                    <button onclick="mostrarSinIva()">Sin IVA</button>
+                <div style="display: flex; justify-content: space-between; align-items: center; gap: 10px; margin-bottom: 15px; flex-wrap: wrap;">
+                    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+                        <button onclick="mostrarTodos()">Todos</button>
+                        <button onclick="mostrarConIva()">Con IVA</button>
+                        <button onclick="mostrarSinIva()">Sin IVA</button>
+                    </div>
+                    <!-- BOTÓN IMPRIMIR INVENTARIO A EXCEL -->
+                    <button onclick="exportarInventarioExcel()" style="background: #238636; color: white; padding: 10px 20px;">📊 Imprimir Inventario en Excel</button>
                 </div>
 
                 <!-- BÚSQUEDA Y FILTROS POR FECHA DE CREACIÓN DE PRODUCTOS -->

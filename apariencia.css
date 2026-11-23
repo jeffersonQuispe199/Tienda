@@ -46,7 +46,7 @@ body {
    TARJETAS Y CUADROS TRANSPARENTES (GLASSMORPHISM)
    ========================================================================== */
 .card {
-    background: rgba(22, 27, 34, 0.55) !important; /* <--- CAMBIA AQUÍ LA TRANSPARENCIA */
+    background: rgba(22, 27, 34, 0.55) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     padding: 25px;
@@ -75,7 +75,7 @@ h2 {
 .titulo {
     text-align: center;
     padding: 25px;
-    background: rgba(22, 27, 34, 0.55) !important; /* <--- CAMBIA AQUÍ LA TRANSPARENCIA */
+    background: rgba(22, 27, 34, 0.55) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-radius: 12px;
@@ -171,7 +171,7 @@ table {
     width: 100%;
     min-width: 600px;
     border-collapse: collapse;
-    background: rgba(13, 17, 23, 0.6); /* Tabla ligeramente transparente */
+    background: rgba(13, 17, 23, 0.6);
     border-radius: 8px;
     overflow: hidden;
     border: 1px solid rgba(48, 54, 61, 0.7);
@@ -251,7 +251,7 @@ td button:hover {
    MENÚ DE NAVEGACIÓN FLEXIBLE
    ========================================================================== */
 .menu {
-    background: rgba(22, 27, 34, 0.55) !important; /* <--- CAMBIA AQUÍ LA TRANSPARENCIA */
+    background: rgba(22, 27, 34, 0.55) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     padding: 12px;
@@ -314,7 +314,7 @@ td button:hover {
 .box-total {
     width: 100%;
     max-width: 400px;
-    background: rgba(22, 27, 34, 0.65) !important; /* <--- CAMBIA AQUÍ LA TRANSPARENCIA */
+    background: rgba(22, 27, 34, 0.65) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     padding: 20px;
@@ -477,7 +477,7 @@ body.light-theme .card,
 body.light-theme .menu,
 body.light-theme .titulo,
 body.light-theme .box-total {
-    background: rgba(255, 255, 255, 0.05) !important; /* <--- TRANSPARENCIA MODO CLARO */
+    background: rgba(255, 255, 255, 0.05) !important;
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-color: rgba(208, 215, 222, 0.6);
@@ -574,11 +574,11 @@ body.light-theme .pie-pagina {
     }
 
     .btn-tema-flotante {
-        position: static;
-        display: block;
-        width: 100%;
-        margin-bottom: 15px;
-        border-radius: 6px;
+        position: fixed;
+        top: 10px;
+        right: 10px;
+        padding: 6px 12px;
+        font-size: 0.8rem;
     }
 
     .totales {

@@ -6,7 +6,7 @@ let productos = []; // Productos en la factura actual
 let totalGeneralGlobal = 0; 
 let productoLiquidoPendiente = null; // Variable temporal para el modal de líquidos
 
-// MANTENIDO SIN CAMBIOS (APARTADO A): Credenciales de contabilidad
+// Credenciales de contabilidad
 const CREDANCIALES_CONTABILIDAD = { usuario: "admin", clave: "1234" };
 let accesoContabilidadConcedido = false;
 
@@ -64,7 +64,7 @@ function pintarProductos(lista = listaProductos) {
     let contenido = "";
     for (let i = 0; i < lista.length; i++) {
         let pCompra = parseFloat(lista[i].precioCompra) || 0;
-        let pVenta = parseFloat(lista[i].precioVenta) || parseFloat(lista[i].precio) || 0;
+        let pVenta = parseFloat(lista[i].precioVenta) || 0;
         let ganancia = pVenta - pCompra;
         let margenPorcentaje = pCompra > 0 ? ((ganancia / pCompra) * 100).toFixed(1) : "0.0";
         let ivaPorcentaje = lista[i].iva ? 15 : 0;
@@ -146,7 +146,6 @@ function guardarEdicionProducto(i) {
         nombre: nuevoNombre,
         precioCompra: nuevoPrecioCompra,
         precioVenta: nuevoPrecioVenta,
-        precio: nuevoPrecioVenta,
         cantidad: nuevaCantidad,
         esLiquido: nuevoEsLiquido,
         iva: nuevoIva
@@ -165,6 +164,61 @@ function eliminarProductoLista(nombre) {
     pintarHistorialContable();
 }
 
+// EXPORTAR / IMPRIMIR INVENTARIO A EXCEL
+function exportarInventarioExcel() {
+    if (listaProductos.length === 0) {
+        alert("No hay productos en el inventario para exportar.");
+        return;
+    }
+
+    let csv = `<meta charset="utf-8">
+    <table border="1">
+        <tr style="background-color: #0969da; color: #ffffff; font-weight: bold;">
+            <th>Fecha Registro</th>
+            <th>Código</th>
+            <th>Producto</th>
+            <th>Precio Compra ($)</th>
+            <th>Precio Venta ($)</th>
+            <th>Ganancia ($)</th>
+            <th>Margen (%)</th>
+            <th>Stock (u.)</th>
+            <th>Líquido</th>
+            <th>IVA %</th>
+            <th>Total con IVA ($)</th>
+        </tr>`;
+
+    for (let i = 0; i < listaProductos.length; i++) {
+        let pCompra = parseFloat(listaProductos[i].precioCompra) || 0;
+        let pVenta = parseFloat(listaProductos[i].precioVenta) || 0;
+        let ganancia = pVenta - pCompra;
+        let margen = pCompra > 0 ? ((ganancia / pCompra) * 100).toFixed(1) : "0.0";
+        let ivaPorcentaje = listaProductos[i].iva ? 15 : 0;
+        let totalConIva = pVenta + (pVenta * (ivaPorcentaje / 100));
+
+        csv += `<tr>
+            <td>${listaProductos[i].fecha || 'N/A'}</td>
+            <td>${listaProductos[i].codigo || 'S/C'}</td>
+            <td>${listaProductos[i].nombre}</td>
+            <td>${pCompra.toFixed(2)}</td>
+            <td>${pVenta.toFixed(2)}</td>
+            <td>${ganancia.toFixed(2)}</td>
+            <td>${margen}%</td>
+            <td>${listaProductos[i].cantidad || 0}</td>
+            <td>${listaProductos[i].esLiquido ? 'Sí' : 'No'}</td>
+            <td>${ivaPorcentaje}%</td>
+            <td>${totalConIva.toFixed(2)}</td>
+        </tr>`;
+    }
+
+    csv += "</table>";
+
+    let blob = new Blob([csv], { type: "application/vnd.ms-excel" });
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `Inventario_Productos_${obtenerFechaActual().split(' ')[0]}.xls`;
+    a.click();
+}
+
 // AUTOCOMPLETADO Y ENTER EN FACTURACIÓN
 function asignarAutocompletadoFactura() {
     let input = document.getElementById("producto");
@@ -174,7 +228,7 @@ function asignarAutocompletadoFactura() {
         let txt = this.value.trim().toLowerCase();
         let prod = listaProductos.find(p => p.nombre.toLowerCase() === txt || (p.codigo && p.codigo.toLowerCase() === txt));
         if (prod) {
-            document.getElementById("precio").value = prod.precioVenta || prod.precio;
+            document.getElementById("precio").value = prod.precioVenta;
         }
     });
 
@@ -197,7 +251,7 @@ function procesarAgregarProducto() {
     );
 
     if (prodEncontrado && (isNaN(precio) || precio <= 0)) {
-        precio = prodEncontrado.precioVenta || prodEncontrado.precio;
+        precio = prodEncontrado.precioVenta;
         document.getElementById("precio").value = precio;
     }
 
@@ -398,7 +452,7 @@ function guardarCliente() {
         cedula, 
         telefono, 
         correo, 
-        fecha: obtenerFechaActual() // FECHA DE REGISTRO
+        fecha: obtenerFechaActual()
     });
     localStorage.setItem("clientes_sistema", JSON.stringify(clientes));
     pintarClientes();
@@ -515,9 +569,13 @@ function guardarYLimpiarFactura() {
     localStorage.setItem("productos_sistema", JSON.stringify(listaProductos));
     pintarProductos();
 
-    let pagoCliente = parseFloat(document.getElementById("montoRecibido").value) || totalFactura;
-    if (pagoCliente < totalFactura) {
-        alert("El monto ingresado es menor al total.");
+    let campoMontoRecibido = document.getElementById("montoRecibido").value.trim();
+    let pagoCliente = parseFloat(campoMontoRecibido);
+
+    if (campoMontoRecibido === "" || isNaN(pagoCliente)) {
+        pagoCliente = totalFactura;
+    } else if (pagoCliente < totalFactura) {
+        alert("El monto ingresado es menor al total a pagar.");
         return;
     }
 
@@ -525,7 +583,7 @@ function guardarYLimpiarFactura() {
     let listadoTexto = productos.map(p => `${p.producto} (x${p.cantidad})`).join(", ");
 
     historialContable.push({
-        fecha: obtenerFechaActual(), // FECHA
+        fecha: obtenerFechaActual(),
         cliente: inputCliente,
         cedula: inputCedula,
         productos: listadoTexto,
@@ -699,12 +757,11 @@ function agregarProductoLista() {
         nombre: inputNombre,
         precioCompra: inputPrecioCompra,
         precioVenta: inputPrecioVenta,
-        precio: inputPrecioVenta,
         cantidad: inputCantidad,
         stockMaximo: inputStockMaximo,
         esLiquido: inputEsLiquido,
         iva: inputIva,
-        fecha: obtenerFechaActual() // FECHA DE CREACIÓN DEL PRODUCTO
+        fecha: obtenerFechaActual()
     });
 
     localStorage.setItem("productos_sistema", JSON.stringify(listaProductos));
@@ -741,7 +798,7 @@ function iniciarEscaneoCamara(modo = 'factura') {
                 document.getElementById("producto").value = decodedText;
                 let prod = listaProductos.find(p => p.nombre.toLowerCase() === decodedText.toLowerCase() || (p.codigo && p.codigo.toLowerCase() === decodedText.toLowerCase()));
                 if (prod) {
-                    document.getElementById("precio").value = prod.precioVenta || prod.precio;
+                    document.getElementById("precio").value = prod.precioVenta;
                 }
                 procesarAgregarProducto();
             } else if (modo === 'compras') {
@@ -913,7 +970,7 @@ function guardarFacturaCompra() {
     pintarProductos();
 
     historialCompras.push({
-        fecha: obtenerFechaActual(), // FECHA DE LA COMPRA
+        fecha: obtenerFechaActual(),
         proveedor: proveedor,
         numFactura: numFactura,
         detalle: detalleTexto.join(", "),
@@ -947,6 +1004,78 @@ function pintarHistorialCompras(lista = historialCompras) {
     if (tabla) {
         tabla.innerHTML = html === "" ? "<tr><td colspan='5'>No hay compras registradas.</td></tr>" : html;
     }
+}
+
+// FUNCIONES NUEVAS PARA EXPORTAR CLIENTES Y COMPRAS A EXCEL
+
+function exportarClientesExcel() {
+    if (clientes.length === 0) {
+        alert("No hay clientes registrados para exportar.");
+        return;
+    }
+
+    let csv = `<meta charset="utf-8">
+    <table border="1">
+        <tr style="background-color: #0969da; color: #ffffff; font-weight: bold;">
+            <th>Fecha Registro</th>
+            <th>Nombre</th>
+            <th>Cédula / RUC</th>
+            <th>Teléfono</th>
+            <th>Correo</th>
+        </tr>`;
+
+    for (let i = 0; i < clientes.length; i++) {
+        csv += `<tr>
+            <td>${clientes[i].fecha || 'N/A'}</td>
+            <td>${clientes[i].nombre}</td>
+            <td>${clientes[i].cedula}</td>
+            <td>${clientes[i].telefono}</td>
+            <td>${clientes[i].correo}</td>
+        </tr>`;
+    }
+
+    csv += "</table>";
+
+    let blob = new Blob([csv], { type: "application/vnd.ms-excel" });
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `Clientes_${obtenerFechaActual().split(' ')[0]}.xls`;
+    a.click();
+}
+
+function exportarComprasExcel() {
+    if (historialCompras.length === 0) {
+        alert("No hay registro de compras para exportar.");
+        return;
+    }
+
+    let csv = `<meta charset="utf-8">
+    <table border="1">
+        <tr style="background-color: #0969da; color: #ffffff; font-weight: bold;">
+            <th>Fecha / Hora</th>
+            <th>Proveedor</th>
+            <th>N° Factura</th>
+            <th>Detalle / Items</th>
+            <th>Total Invertido ($)</th>
+        </tr>`;
+
+    for (let i = 0; i < historialCompras.length; i++) {
+        csv += `<tr>
+            <td>${historialCompras[i].fecha || 'N/A'}</td>
+            <td>${historialCompras[i].proveedor}</td>
+            <td>${historialCompras[i].numFactura}</td>
+            <td>${historialCompras[i].detalle}</td>
+            <td>${historialCompras[i].total.toFixed(2)}</td>
+        </tr>`;
+    }
+
+    csv += "</table>";
+
+    let blob = new Blob([csv], { type: "application/vnd.ms-excel" });
+    let a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = `Historial_Compras_${obtenerFechaActual().split(' ')[0]}.xls`;
+    a.click();
 }
 
 // INICIALIZACIÓN GENERAL
