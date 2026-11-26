@@ -120,7 +120,7 @@ function configurarFormularioLogin() {
                 
                 // Redirigir a tu otro archivo HTML (Asegúrate de que se llame index.html o cambia el nombre)
                 setTimeout(() => {
-                    window.location.href = "../index.html"; 
+                    window.location.href = "sistema.html"; 
                 }, 1000);
 
             } else {
